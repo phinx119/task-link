@@ -1,15 +1,15 @@
 // Manage task list ----------------------------------------------------------------------------------------------------
 function manageTaskList() {
-    // Display list
+    // Display list of task list
     displayTaskList();
-    
-    // Add new list
-    $('#add-new-list').on('click', function(e) {
+
+    // Handle add new list
+    $('#add-new-list').on('click', function () {
         addNewTaskList();
     })
 }
 
-// Display task list ------------------------------------------------------------------------------------------------------
+// Display task list ---------------------------------------------------------------------------------------------------
 //  ██████  ███████ ████████
 // ██       ██         ██
 // ██   ███ █████      ██
@@ -17,39 +17,46 @@ function manageTaskList() {
 //  ██████  ███████    ██
 
 function displayTaskList() {
+    // Set variable
     let taskListsHtml = '';
+
+    // Call api to get task by user id
     $.ajax({
         async: true,
         type: 'GET',
         url: `${apiUrl}TaskLists/${preferences.userId}`,
         dataType: 'json',
         success: function (receivedData) {
-            console.log(receivedData);
+            //console.log(receivedData);
+
             if (receivedData == null || receivedData.length === 0) {
                 swal('Info', 'No task list found', 'info');
             } else {
-            $.each(receivedData, function (index, taskList) {
-                taskListsHtml += `                
-                    <li>
-                        <a href="#" onclick="displayTasksByTaskList(${taskList.listId}, '${taskList.listName}')">
-                            <i class="bx bx-user-circle"></i>
-                            <span>${taskList.listName}</span>
-                        </a>
-                        <div>
-                            <a>
-                                <i class="bx bx-info-circle" onclick="updateTaskList(${taskList.listId}, '${taskList.listName}')"></i>
-                                <i class="bx bx-trash-alt" onclick="deleteTaskList(${taskList.listId})"></i>
+                $.each(receivedData, function (index, taskList) {
+                    taskListsHtml += `                
+                        <li>
+                            <a href="#" onclick="displayTasksByTaskList(${taskList.listId}, '${taskList.listName}')">
+                                <i class="bx bx-user-circle"></i>
+                                <span>${taskList.listName}</span>
                             </a>
-                        </div> 
-                    </li>
-                `;
-            });
+                            <div>
+                                <a>
+                                    <i class="bx bx-info-circle" onclick="updateTaskList(${taskList.listId}, '${taskList.listName}')"></i>
+                                    <i class="bx bx-trash-alt" onclick="deleteTaskList(${taskList.listId})"></i>
+                                </a>
+                            </div> 
+                        </li>
+                    `;
+                });
             }
+
+            // Set html
             $('#list-by-name').html(taskListsHtml);
         },
-        error: function (err) {
-            console.log(err);
-            swal('Error', `${err.responseText}`, 'error');
+        error: function (xhr) {
+            //console.error(xhr.responseText);
+
+            swal('Error', `${xhr.responseText}`, 'error');
         }
     });
 }
@@ -62,6 +69,7 @@ function displayTaskList() {
 // ██       ██████  ███████    ██
 
 function addNewTaskList() {
+    // Display create new task list dialog
     swal({
         title: 'Create new task list',
         content: {
@@ -82,23 +90,28 @@ function addNewTaskList() {
         closeOnClickOutside: false,
     }).then((result) => {
         if (result && result.dismiss !== 'cancel') {
+            // Get input value
             const listName = document.getElementById('swal-input-list-name').value;
 
+            // Validate input
             if (listName && listName !== '') {
-                // Call api to create new list
+                // Call API to create new task list
                 $.ajax({
                     async: true,
                     type: 'POST',
                     url: `${apiUrl}TaskLists/${preferences.userId}?listName=${listName}`,
                     contentType: 'application/json',
                     success: function (receivedData) {
-                        console.log(receivedData);
+                        //console.log(receivedData);
+
+                        // Reload task list if response ok
                         displayTaskList();
                         swal('Success', 'Create new list successfully.', 'success');
                     },
-                    error: function (err) {
-                        console.log(err);
-                        swal('Error', `${err.responseText}`, 'error').then(() => {
+                    error: function (xhr) {
+                        //console.error(xhr.responseText);
+
+                        swal('Error', `${xhr.responseText}`, 'error').then(() => {
                             // Reopen the create dialog if response error
                             addNewTaskList();
                         });
@@ -106,7 +119,7 @@ function addNewTaskList() {
                 });
             } else {
                 swal('Error', 'List name cannot be empty', 'error').then(() => {
-                    // Reopen the login dialog if validation fails
+                    // Reopen the create dialog if validation fails
                     addNewTaskList();
                 });
             }
@@ -122,6 +135,7 @@ function addNewTaskList() {
 // ██       ██████     ██
 
 function updateTaskList(listId, listName) {
+    // Display update task list dialog
     swal({
         title: 'Update task list',
         content: {
@@ -142,8 +156,10 @@ function updateTaskList(listId, listName) {
         closeOnClickOutside: false,
     }).then((result) => {
         if (result && result.dismiss !== 'cancel') {
+            // Get input value
             const listName = document.getElementById('swal-input-list-name').value;
 
+            // Validate input
             if (listName && listName !== '') {
                 // Call API to update list
                 $.ajax({
@@ -152,13 +168,16 @@ function updateTaskList(listId, listName) {
                     url: `${apiUrl}TaskLists/${preferences.userId}/${listId}?listName=${listName}`,
                     contentType: 'application/json',
                     success: function (receivedData) {
-                        console.log(receivedData);
+                        //console.log(receivedData);
+
+                        // Reload task list if response ok
                         displayTaskList();
                         swal('Success', 'Update list successfully.', 'success');
                     },
-                    error: function (err) {
-                        console.log(err);
-                        swal('Error', `${err.responseText}`, 'error').then(() => {
+                    error: function (xhr) {
+                        //console.error(xhr.responseText);
+
+                        swal('Error', `${xhr.responseText}`, 'error').then(() => {
                             // Reopen the update dialog if response error
                             updateTaskList(listId, listName);
                         });
@@ -180,8 +199,9 @@ function updateTaskList(listId, listName) {
 // ██   ██ █████   ██      █████      ██    █████
 // ██   ██ ██      ██      ██         ██    ██
 // ██████  ███████ ███████ ███████    ██    ███████
-                                                 
+
 function deleteTaskList(listId) {
+    // Display delete task list dialog
     swal({
         title: 'Delete all data?',
         text: 'Once deleted, you will not be able to recover this data!',
@@ -197,16 +217,20 @@ function deleteTaskList(listId) {
                 url: `${apiUrl}TaskLists/${preferences.userId}/${listId}`,
                 contentType: 'application/json',
                 success: function (receivedData) {
-                    console.log(receivedData);
+                    //console.log(receivedData);
+
+                    // Reload task list if response ok
                     displayTaskList();
                     swal('Success', 'Delete list successfully.', 'success');
                 },
-                error: function (err) {
-                    console.log(err);
-                    swal('Error', `${err.responseText}`, 'error');
+                error: function (xhr) {
+                    //console.error(xhr.responseText);
+
+                    swal('Error', `${xhr.responseText}`, 'error');
                 }
             });
         }
     });
 }
+
 // ---------------------------------------------------------------------------------------------------------------------
