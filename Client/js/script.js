@@ -1,3 +1,5 @@
+let apiUrl = 'http://localhost:5000/api/';
+
 function showDivisionsWithDelay() {
     const delay = 100;
 

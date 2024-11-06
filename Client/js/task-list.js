@@ -9,8 +9,6 @@ function manageTaskList() {
     })
 }
 
-let taskListUrl = 'http://localhost:5000/api/TaskLists/';
-
 // Display task list ------------------------------------------------------------------------------------------------------
 //  ██████  ███████ ████████
 // ██       ██         ██
@@ -23,7 +21,7 @@ function displayTaskList() {
     $.ajax({
         async: true,
         type: 'GET',
-        url: taskListUrl + `${preferences.userId}`,
+        url: `${apiUrl}TaskLists/${preferences.userId}`,
         dataType: 'json',
         success: function (receivedData) {
             console.log(receivedData);
@@ -91,7 +89,7 @@ function addNewTaskList() {
                 $.ajax({
                     async: true,
                     type: 'POST',
-                    url: taskListUrl + `${preferences.userId}?listName=${listName}`,
+                    url: `${apiUrl}TaskLists/${preferences.userId}?listName=${listName}`,
                     contentType: 'application/json',
                     success: function (receivedData) {
                         console.log(receivedData);
@@ -151,7 +149,7 @@ function updateTaskList(listId, listName) {
                 $.ajax({
                     async: true,
                     type: 'PUT',
-                    url: taskListUrl + `${preferences.userId}/${listId}?listName=${listName}`,
+                    url: `${apiUrl}TaskLists/${preferences.userId}/${listId}?listName=${listName}`,
                     contentType: 'application/json',
                     success: function (receivedData) {
                         console.log(receivedData);
@@ -192,24 +190,21 @@ function deleteTaskList(listId) {
         dangerMode: true,
     }).then((willDelete) => {
         if (willDelete) {
-            // Call API to update list
+            // Call API to delete list
             $.ajax({
                 async: true,
                 type: 'DELETE',
-                url: taskListUrl + `${preferences.userId}/${listId}`,
+                url: `${apiUrl}TaskLists/${preferences.userId}/${listId}`,
                 contentType: 'application/json',
                 success: function (receivedData) {
                     console.log(receivedData);
                     displayTaskList();
-                    swal('Success', 'Update list successfully.', 'success');
+                    swal('Success', 'Delete list successfully.', 'success');
                 },
                 error: function (err) {
                     console.log(err);
                     swal('Error', `${err.responseText}`, 'error');
                 }
-            });
-            swal('All data has been deleted!', {
-                icon: 'success',
             });
         }
     });

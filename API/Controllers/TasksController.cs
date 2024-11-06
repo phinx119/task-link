@@ -30,6 +30,16 @@ namespace API.Controllers
             return Ok(tasks);
         }
 
+        // GET: get task by id
+        [HttpGet("TaskId/{taskId}")]
+        public async Task<IActionResult> GetById(int taskId)
+        {
+            // get task by id
+            var task = await context.Tasks.FindAsync(taskId);
+
+            return Ok(task);
+        }
+
         // GET: get task list by time unit (day, week, month, all)
         [HttpGet("{userId}/{timeUnit}")]
         public async Task<IActionResult> GetListByTimeUnit(int userId, string timeUnit)
@@ -72,7 +82,7 @@ namespace API.Controllers
         }
 
         // GET: get list by task list id
-        [HttpGet("{listId}")]
+        [HttpGet("ListId/{listId}")]
         public async Task<IActionResult> GetListByTaskList(int listId)
         {
             // get task list by list id

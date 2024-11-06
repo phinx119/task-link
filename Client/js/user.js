@@ -54,7 +54,7 @@ function login() {
             if (username && password) {
                 // Call API to login
                 $.ajax({
-                    url: `http://localhost:5000/api/Users/Login?username=${username}&password=${password}`,
+                    url: `${apiUrl}Users/Login?username=${username}&password=${password}`,
                     type: 'GET',
                     contentType: 'application/json; charset=utf-8',
                     dataType: 'json',

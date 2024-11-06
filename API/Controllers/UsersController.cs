@@ -119,22 +119,19 @@ namespace API.Controllers
                 return BadRequest("User not exist.");
             }
 
-            //// get task list today
-            //var currentDate = DateTime.Now;
-            //var tasks = await context.Tasks
-            //    .Where(t => t.List.UserId == userId &&
-            //                t.DueDate.Date == currentDate.Date
-            //    ).ToListAsync();
+            // get task list today
+            var currentDate = DateTime.Now;
+            var tasks = await context.Tasks
+                .Where(t => t.List.UserId == userId &&
+                            t.DueDate.Date == currentDate.Date
+                ).ToListAsync();
 
-            //// update streak
-            //if (tasks.Count == 0)
-            //{
-            //    user.Streak += 1;
-            //    await context.SaveChangesAsync();
-            //}
-
-            user.Streak += 1;
-            await context.SaveChangesAsync();
+            // update streak
+            if (tasks.Count == 0)
+            {
+                user.Streak += 1;
+                await context.SaveChangesAsync();
+            }
 
             return Ok(user);
         }

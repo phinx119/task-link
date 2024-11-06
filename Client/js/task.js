@@ -11,14 +11,21 @@ function manageTask() {
         }
     });
 
-
     // Add new task
-    $('#add-new-task').on('click', function (e) {
-        addNewTask();
+    $('#add-new-task').on('click', function () {
+        addNewTask(sendingData);
     })
 }
 
-let taskUrl = 'http://localhost:5000/api/Tasks/';
+let sendingData = {
+    listId: null,
+    title: '',
+    note: '',
+    dueDate: null,
+    repeatId: null,
+    priority: null,
+    status: null,
+};
 
 // Show task ------------------------------------------------------------------------------------------------------
 //  ██████  ███████ ████████
@@ -26,8 +33,6 @@ let taskUrl = 'http://localhost:5000/api/Tasks/';
 // ██   ███ █████      ██
 // ██    ██ ██         ██
 //  ██████  ███████    ██
-
-const taskContainer = document.getElementById('');
 
 // Check if a date is today
 const isToday = (dateString) => {
@@ -45,18 +50,18 @@ function displayTasks(html, receivedData) {
             const dueDate = new Date(task.dueDate)
 
             html += `                
-            <div class="card align" data-task-id="${task.taskId}">
-                <input type="checkbox" name="task" id="${task.taskId}">
-                <div>
-                    <span>${task.title}</span>
-                    <p id="taskDate" class="date ${isToday(task.dueDate) ? 'today' : ''}">
-                        ${isToday(task.dueDate) ? 'Today' : '<i class="bx bx-calendar-alt"></i> ' + dueDate.toDateString()} - ${dueDate.toTimeString()}
-                    </p>
+                <div class="card align" data-task-id="${task.taskId}">
+                    <input type="checkbox" name="task" id="${task.taskId}">
+                    <div>
+                        <span>${task.title}</span>
+                        <p id="taskDate" class="date ${isToday(task.dueDate) ? 'today' : ''}">
+                            ${isToday(task.dueDate) ? 'Today' : '<i class="bx bx-calendar-alt"></i> ' + dueDate.toDateString()} - ${dueDate.toTimeString()}
+                        </p>
+                    </div>
+                    <i class="bx bx-info-circle" onclick="updateTask(${task.taskId})"></i>
+                    <i class="bx bx-trash-alt" onclick="deleteTask(${task.taskId})"></i>
                 </div>
-                <i class="bx bx-info-circle" onclick="updateTask(${task.taskId})"></i>
-                <i class="bx bx-trash-alt" onclick="deleteTask(${task.taskId})"></i>
-            </div>
-        `;
+            `;
         });
     }
     $('#task-container').html(html);
@@ -65,15 +70,15 @@ function displayTasks(html, receivedData) {
 }
 
 // Display task by time unit
-function displayTasksByTimeUnit(timeUnit, url) {
-    $('#header_title').text(timeUnit);
+function displayTasksByTimeUnit(timeUnit, timeUnitUrl) {
+    $('#header_title').html(timeUnit);
     let tasksHtml = '';
 
     // Call api to get tasks
     $.ajax({
         async: true,
         type: 'GET',
-        url: taskUrl + `${preferences.userId}/${url}`,
+        url: `${apiUrl}Tasks/${preferences.userId}/${timeUnitUrl}`,
         dataType: 'json',
         success: function (receivedData) {
             displayTasks(tasksHtml, receivedData);
@@ -87,14 +92,14 @@ function displayTasksByTimeUnit(timeUnit, url) {
 
 // Display task by task list
 function displayTasksByTaskList(listId, listName) {
-    $('#header_title').text(listName);
+    $('#header_title').html(listName);
     let tasksHtml = '';
-    
+
     // Call api to get tasks
     $.ajax({
         async: true,
         type: 'GET',
-        url: taskUrl + `${listId}`,
+        url: `${apiUrl}Tasks/ListId/${listId}`,
         dataType: 'json',
         success: function (receivedData) {
             displayTasks(tasksHtml, receivedData);
@@ -114,6 +119,8 @@ function displayTasksByTaskList(listId, listName) {
 // ███████ ███████ ██   ██ ██   ██  ██████ ██   ██
 
 function searchTask() {
+    $('#header_title').html('Result');
+    
     const searchInput = document.getElementById('search');
     const searchText = searchInput.value.trim().toLowerCase();
     let tasksHtml = '';
@@ -122,7 +129,7 @@ function searchTask() {
     $.ajax({
         async: true,
         type: 'GET',
-        url: taskUrl,
+        url: `${apiUrl}Tasks`,
         dataType: 'json',
         success: function (receivedData) {
             console.log(receivedData);
@@ -163,15 +170,63 @@ function searchTask() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+// Load list to option input
+let listOption;
+
+function loadListOption(listId) {
+    listOption = '';
+    $.ajax({
+        async: true,
+        type: 'GET',
+        url: `${apiUrl}TaskLists/${preferences.userId}`,
+        dataType: 'json',
+        success: function (receivedData) {
+            console.log(receivedData);
+            if (receivedData == null || receivedData.length === 0) {
+                swal('Info', 'No task list found', 'info');
+            } else {
+                $.each(receivedData, function (index, taskList) {
+                    listOption += `<option value="${taskList.listId}" ${taskList.listId === listId ? 'selected' : ''}>${taskList.listName}</option>`;
+                });
+            }
+        },
+        error: function (err) {
+            console.log(err);
+            swal('Error', `${err.responseText}`, 'error');
+        }
+    });
+}
+
 let currentDateTime = new Date();
 currentDateTime.setHours(currentDateTime.getHours() + 7);
 let formattedCurrentDateTime = currentDateTime.toISOString().slice(0, 16);
 
-// Load list to option input
-let listOption = '<option>My List</option>'
-
 // Load list to repeat input
-let repeatOption = '<option>Never</option>'
+let repeatOption;
+
+function loadRepeatOption(repeatId) {
+    repeatOption = '';
+    $.ajax({
+        async: true,
+        type: 'GET',
+        url: `${apiUrl}Repeats`,
+        dataType: 'json',
+        success: function (receivedData) {
+            console.log(receivedData);
+            if (receivedData == null || receivedData.length === 0) {
+                swal('Info', 'No repeat option found', 'info');
+            } else {
+                $.each(receivedData, function (index, repeat) {
+                    repeatOption += `<option value="${repeat.repeatId}" ${repeat.repeatId === repeatId ? 'selected' : ''}>${repeat.repeatName}</option>`;
+                });
+            }
+        },
+        error: function (err) {
+            console.log(err);
+            swal('Error', `${err.responseText}`, 'error');
+        }
+    });
+}
 
 // Create new task -----------------------------------------------------------------------------------------------------
 // ██████   ██████  ███████ ████████
@@ -180,19 +235,23 @@ let repeatOption = '<option>Never</option>'
 // ██      ██    ██      ██    ██
 // ██       ██████  ███████    ██
 
-function addNewTask() {
-    swal({
-        title: 'Create new task',
-        content: {
-            element: 'div',
-            attributes: {
-                innerHTML: `
+function addNewTask(sendingData) {
+    loadListOption(sendingData.listId == null ? 1 : sendingData.listId);
+    loadRepeatOption(sendingData.repeatId == null ? 1 : sendingData.repeatId);
+
+    setTimeout(function () {
+        swal({
+            title: 'Create new task',
+            content: {
+                element: 'div',
+                attributes: {
+                    innerHTML: `
                     <div class='form__group field'>
-                        <input type='text' class='form__field' placeholder='Title' id='swal-input-title' required=''>
+                        <input type='text' class='form__field' placeholder='Title' id='swal-input-title' value="${sendingData.title}" required>
                         <label for='swal-input-title' class='form__label'>Title</label>
                     </div>
                     <div class='form__group field'>
-                        <input type='text' class='form__field' placeholder='Note' id='swal-input-note'>
+                        <input type='text' class='form__field' placeholder='Note' id='swal-input-note' value="${sendingData.note}">
                         <label for='swal-input-note' class='form__label'>Note</label>
                     </div>
                     <div style='display: flex; width: 95%'>
@@ -204,16 +263,16 @@ function addNewTask() {
                         </div>
                         <div class='form__group field'>
                             <select class='form__field' id='swal-input-priority'>
-                                <option value='Low'>Low</option>
-                                <option value='Medium'>Medium</option>
-                                <option value='High'>High</option>
+                                <option value='Low' ${sendingData.priority === 'Low' ? 'selected' : ''}>Low</option>
+                                <option value='Medium' ${sendingData.priority === 'Medium' ? 'selected' : ''}>Medium</option>
+                                <option value='High' ${sendingData.priority === 'High' ? 'selected' : ''}>High</option>
                             </select>
                             <label for='swal-input-priority' class='form__label'>Priority</label>
                         </div>          
                     </div>
                     <div class='form__group field'>
-                        <input type='datetime-local' class='form__field' placeholder='Due Date' id='swal-input-duedate' value='${formattedCurrentDateTime}'>
-                        <label for='swal-input-duedate' class='form__label'>Due Date</label>
+                        <input type='datetime-local' class='form__field' placeholder='Due Date' id='swal-input-due-date' value='${sendingData.dueDate == null ? formattedCurrentDateTime : sendingData.dueDate}' required>
+                        <label for='swal-input-due-date' class='form__label'>Due Date</label>
                     </div>
                     <div class='form__group field'>
                         <select class='form__field' id='swal-input-repeat'>
@@ -222,35 +281,62 @@ function addNewTask() {
                         <label for='swal-input-repeat' class='form__label'>List</label>
                     </div>
                 `,
+                },
             },
-        },
-        buttons: {
-            cancel: 'Cancel',
-            confirm: 'Save',
-        },
-        closeOnClickOutside: false,
-    }).then((result) => {
-        if (result && result.dismiss !== 'cancel') {
-            const title = document.getElementById('swal-input-title').value;
-            const note = document.getElementById('swal-input-note').value;
-            const list = document.getElementById('swal-input-list').value;
-            const priority = document.getElementById('swal-input-priority').value;
-            const duedate = document.getElementById('swal-input-duedate').value;
-            const repeat = document.getElementById('swal-input-repeat').value;
+            buttons: {
+                cancel: 'Cancel',
+                confirm: 'Save',
+            },
+            closeOnClickOutside: false,
+        }).then((result) => {
+            if (result && result.dismiss !== 'cancel') {
+                const title = document.getElementById('swal-input-title').value;
+                const note = document.getElementById('swal-input-note').value;
+                const list = document.getElementById('swal-input-list').value;
+                const priority = document.getElementById('swal-input-priority').value;
+                const dueDate = document.getElementById('swal-input-due-date').value;
+                const repeat = document.getElementById('swal-input-repeat').value;
 
-            if (title && note && list && priority && duedate && repeat) {
-                // Call API to login
-
-                swal('Success', 'Create task successful', 'success');
-            } else {
-                swal('Error', 'Input cannot be empty', 'error').then(() => {
-                    // Reopen the login dialog if validation fails
-                    addNewTask()
-                });
+                if (title && list && priority && dueDate && repeat) {
+                    // Call API to login
+                    let sendingData = {
+                        listId: list,
+                        title: title,
+                        note: note,
+                        dueDate: dueDate,
+                        repeatId: repeat,
+                        priority: priority,
+                        status: 'Pending',
+                    };
+                    $.ajax({
+                        async: true,
+                        type: 'POST',
+                        url: `${apiUrl}Tasks`,
+                        contentType: 'application/json',
+                        data: JSON.stringify(sendingData),
+                        success: function (receivedData) {
+                            console.log(receivedData);
+                            displayTasksByTimeUnit('All tasks', 'all');
+                            swal('Success', 'Create task successful', 'success');
+                        },
+                        error: function (err) {
+                            console.log(err);
+                            swal('Error', `${err.responseText}`, 'error').then(() => {
+                                // Reopen the update dialog if response error
+                                addNewTask(sendingData);
+                            });
+                        }
+                    });
+                } else {
+                    swal('Error', 'Input cannot be empty', 'error').then(() => {
+                        // Reopen the login dialog if validation fails
+                        addNewTask()
+                    });
+                }
             }
-        }
-    });
-};
+        });
+    }, 100);
+}
 
 // Update task ---------------------------------------------------------------------------------------------------------
 // ██████  ██    ██ ████████
@@ -260,76 +346,125 @@ function addNewTask() {
 // ██       ██████     ██
 
 function updateTask(taskId) {
-    swal({
-        title: 'Update task',
-        content: {
-            element: 'div',
-            attributes: {
-                innerHTML: `
-                    <div class='form__group field'>
-                        <input type='text' class='form__field' placeholder='Title' id='swal-input-title' required=''>
-                        <label for='swal-input-title' class='form__label'>Title</label>
-                    </div>
-                    <div class='form__group field'>
-                        <input type='text' class='form__field' placeholder='Note' id='swal-input-note'>
-                        <label for='swal-input-note' class='form__label'>Note</label>
-                    </div>
-                    <div style='display: flex; width: 95%'>
-                        <div class='form__group field'>
-                            <select class='form__field' id='swal-input-list'>
-                                ${listOption}
-                            </select>
-                            <label for='swal-input-list' class='form__label'>List</label>
-                        </div>
-                        <div class='form__group field'>
-                            <select class='form__field' id='swal-input-priority'>
-                                <option value='Low'>Low</option>
-                                <option value='Medium'>Medium</option>
-                                <option value='High'>High</option>
-                            </select>
-                            <label for='swal-input-priority' class='form__label'>Priority</label>
-                        </div>          
-                    </div>
-                    <div class='form__group field'>
-                        <input type='datetime-local' class='form__field' placeholder='Due Date' id='swal-input-duedate' value='${formattedCurrentDateTime}'>
-                        <label for='swal-input-duedate' class='form__label'>Due Date</label>
-                    </div>
-                    <div class='form__group field'>
-                        <select class='form__field' id='swal-input-repeat'>
-                        ${repeatOption}
-                        </select>
-                        <label for='swal-input-repeat' class='form__label'>List</label>
-                    </div>
-                `,
-            },
-        },
-        buttons: {
-            cancel: 'Cancel',
-            confirm: 'Save',
-        },
-        closeOnClickOutside: false,
-    }).then((result) => {
-        if (result && result.dismiss !== 'cancel') {
-            const title = document.getElementById('swal-input-title').value;
-            const note = document.getElementById('swal-input-note').value;
-            const list = document.getElementById('swal-input-list').value;
-            const priority = document.getElementById('swal-input-priority').value;
-            const duedate = document.getElementById('swal-input-duedate').value;
-            const repeat = document.getElementById('swal-input-repeat').value;
+    // Call api to search task
+    $.ajax({
+        async: true,
+        type: 'GET',
+        url: `${apiUrl}Tasks/TaskId/${taskId}`,
+        dataType: 'json',
+        success: function (receivedData) {
+            console.log(receivedData);
 
-            if (title && note && list && priority && duedate && repeat) {
-                // Call API to login
+            loadListOption(receivedData.listId);
+            loadRepeatOption(receivedData.repeatId);
 
-                swal('Success', 'Create task successful', 'success');
-            } else {
-                swal('Error', 'Input cannot be empty', 'error').then(() => {
-                    // Reopen the login dialog if validation fails
-                    updateTask(taskId);
+            setTimeout(function () {
+                // Display update form
+                swal({
+                    title: 'Update task',
+                    content: {
+                        element: 'div',
+                        attributes: {
+                            innerHTML: `
+                            <div class='form__group field'>
+                                <input type='text' class='form__field' placeholder='Title' id='swal-input-title' value="${receivedData.title}" required>
+                                <label for='swal-input-title' class='form__label'>Title</label>
+                            </div>
+                            <div class='form__group field'>
+                                <input type='text' class='form__field' placeholder='Note' id='swal-input-note' value="${receivedData.note}">
+                                <label for='swal-input-note' class='form__label'>Note</label>
+                            </div>
+                            <div style='display: flex; width: 95%'>
+                                <div class='form__group field'>
+                                    <select class='form__field' id='swal-input-list'>
+                                        ${listOption}
+                                    </select>
+                                    <label for='swal-input-list' class='form__label'>List</label>
+                                </div>
+                                <div class='form__group field'>
+                                    <select class='form__field' id='swal-input-priority'>
+                                        <option value='Low' ${receivedData.priority === 'Low' ? 'selected' : ''}>Low</option>
+                                        <option value='Medium' ${receivedData.priority === 'Medium' ? 'selected' : ''}>Medium</option>
+                                        <option value='High' ${receivedData.priority === 'High' ? 'selected' : ''}>High</option>
+                                    </select>
+                                    <label for='swal-input-priority' class='form__label'>Priority</label>
+                                </div>          
+                            </div>
+                            <div class='form__group field'>
+                                <input type='datetime-local' class='form__field' placeholder='Due Date' id='swal-input-due-date' value='${receivedData.dueDate}' required>
+                                <label for='swal-input-due-date' class='form__label'>Due Date</label>
+                            </div>
+                            <div class='form__group field'>
+                                <select class='form__field' id='swal-input-repeat'>
+                                ${repeatOption}
+                                </select>
+                                <label for='swal-input-repeat' class='form__label'>List</label>
+                            </div>
+                        `,
+                        },
+                    },
+                    buttons: {
+                        cancel: 'Cancel',
+                        confirm: 'Save',
+                    },
+                    closeOnClickOutside: false,
+                }).then((result) => {
+                    if (result && result.dismiss !== 'cancel') {
+                        const title = document.getElementById('swal-input-title').value;
+                        const note = document.getElementById('swal-input-note').value;
+                        const list = document.getElementById('swal-input-list').value;
+                        const priority = document.getElementById('swal-input-priority').value;
+                        const dueDate = document.getElementById('swal-input-due-date').value;
+                        const repeat = document.getElementById('swal-input-repeat').value;
+
+                        if (title && list && priority && dueDate && repeat) {
+                            // Call API to login
+                            let sendingData = {
+                                listId: list,
+                                title: title,
+                                note: note,
+                                dueDate: dueDate,
+                                repeatId: repeat,
+                                priority: priority,
+                                status: receivedData.status,
+                            };
+                            $.ajax({
+                                async: true,
+                                type: 'PUT',
+                                url: `${apiUrl}Tasks/${receivedData.taskId}`,
+                                contentType: 'application/json',
+                                data: JSON.stringify(sendingData),
+                                success: function (receivedData) {
+                                    console.log(receivedData);
+                                    displayTasksByTimeUnit('All tasks', 'all');
+                                    swal('Success', 'Update task successful', 'success').then(() => {
+                                        updateTask(taskId);
+                                    });
+                                },
+                                error: function (err) {
+                                    console.log(err);
+                                    swal('Error', `${err.responseText}`, 'error').then(() => {
+                                        // Reopen the update dialog if response error
+                                        updateTask(taskId);
+                                    });
+                                }
+                            });
+                        } else {
+                            swal('Error', 'Input cannot be empty', 'error').then(() => {
+                                // Reopen the login dialog if validation fails
+                                updateTask(taskId);
+                            });
+                        }
+                    }
                 });
-            }
+            }, 100);
+        },
+        error: function (err) {
+            console.log(err);
+            swal('Error', `${err.responseText}`, 'error');
         }
     });
-};
+}
 
 // Attach event listener to the parent container
 function updateTaskStatus() {
@@ -397,24 +532,32 @@ function updateTaskStatus() {
 // ██████  ███████ ███████ ███████    ██    ███████
 
 function deleteTask(taskId) {
-    if (event.target.classList.contains('bx-trash-alt')) {
-        const taskId = event.target.closest('.card').dataset.taskId;
-        swal({
-            title: 'Delete current task?',
-            text: 'Once deleted, you will not be able to recover this task!',
-            icon: 'warning',
-            buttons: true,
-            dangerMode: true,
-        }).then((willDelete) => {
-            if (willDelete) {
-                localStorage.removeItem(taskId);
-                event.target.closest('.card').remove();
-                swal('Poof! Your task has been deleted!', {
-                    icon: 'success',
-                });
-            }
-        });
-    }
+    swal({
+        title: 'Delete current task?',
+        text: 'Once deleted, you will not be able to recover this task!',
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+            // Call API to delete list
+            $.ajax({
+                async: true,
+                type: 'DELETE',
+                url: `${apiUrl}Tasks/${taskId}`,
+                contentType: 'application/json',
+                success: function (receivedData) {
+                    console.log(receivedData);
+                    displayTasksByTimeUnit('All tasks', 'all');
+                    swal('Success', 'Delete list successfully.', 'success');
+                },
+                error: function (err) {
+                    console.log(err);
+                    swal('Error', `${err.responseText}`, 'error');
+                }
+            });
+        }
+    });
 }
 
 // Responsive ----------------------------------------------------------------------------------------------------------

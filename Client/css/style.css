@@ -385,16 +385,12 @@ body {
     justify-content: center;
     background-color: #1f1f1fd8;
     height: 25px;
-    width: 35px;
+    width: 25px;
     border-radius: 6px;
 }
 
-.container-sub .header .buttons div {
-    background-color: rgb(255, 255, 255);
-    margin: 1px;
-    height: 4px;
-    width: 4px;
-    border-radius: 50%;
+.container-sub .header .buttons i {
+    color: white;
 }
 
 .container-sub .card-holder {
@@ -475,7 +471,7 @@ body {
     cursor: pointer;
 }
 
-.container-sub .add-new-task {
+.container-sub .move-up {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -486,9 +482,6 @@ body {
     border-radius: 10px;
     color: #FFFFFF;
     background-color: #1f1f1fd8;
-}
-
-.container-sub .add-new-task i {
     cursor: pointer;
 }
 
@@ -593,8 +586,6 @@ body {
 
 
     .container-main {
-        width: 96%;
-        height: 90vh;
         position: relative;
         overflow: hidden;
     }
@@ -679,12 +670,8 @@ body {
 
     .container-sub .header .buttons {
         height: 30px;
-        width: 45px;
+        width: 30px;
         margin-top: -19%;
-    }
-
-    .container-sub .header .buttons div {
-        margin: 2px;
     }
 
     .container-sub .card-holder {
@@ -784,8 +771,6 @@ body {
 
 
     .container-main {
-        width: 96%;
-        height: 87vh;
         position: relative;
         overflow: hidden;
     }
@@ -873,13 +858,8 @@ body {
 
     .container-sub .header .buttons {
         height: 30px;
-        width: 45px;
+        width: 30px;
         margin-top: -19%;
-    }
-
-    .container-sub .header .buttons div {
-        margin: 2px;
-
     }
 
     .container-sub .card-holder {
@@ -947,11 +927,6 @@ body {
 
 /* Medium Devices (Laptops) */
 @media (min-width: 768px) and (max-width: 991px) {
-    .container-main {
-        width: 96%;
-        height: 80vh;
-    }
-
     .dots {
         width: 65px;
         padding-top: 8px;
@@ -1028,12 +1003,7 @@ body {
 
     .container-sub .header .buttons {
         height: 30px;
-        width: 45px;
-    }
-
-    .container-sub .header .buttons div {
-        margin: 2px;
-
+        width: 30px;
     }
 
     .container-sub .card-holder {
@@ -1100,11 +1070,6 @@ body {
 
 /* Large Devices (Desktops) */
 @media (min-width: 992px) and (max-width: 1199px) {
-    .container-main {
-        width: 96%;
-        height: 80vh;
-    }
-
     .center {
         padding: 12px;
     }
@@ -1179,12 +1144,7 @@ body {
 
     .container-sub .header .buttons {
         height: 30px;
-        width: 45px;
-    }
-
-    .container-sub .header .buttons div {
-        margin: 2px;
-
+        width: 30px;
     }
 
     .container-sub .card-holder {
@@ -1247,10 +1207,6 @@ body {
 
 /* Extra Large Devices (Large Desktops) */
 @media (min-width: 1200px) {
-    .container-main {
-        width: 88%;
-    }
-
     .center {
         padding: 18px;
     }
@@ -1350,15 +1306,9 @@ body {
     }
 
     .container-sub .header .buttons {
-        height: 36px;
-        width: 52px;
+        height: 40px;
+        width: 40px;
         border-radius: 10px;
-    }
-
-    .container-sub .header .buttons div {
-        margin: 2px;
-        height: 6px;
-        width: 6px;
     }
 
     .container-sub .card-holder {
@@ -1456,11 +1406,4 @@ body {
         padding: 0px 22px;
     }
 
-
-}
-
-@media (min-width: 1500px) {
-    .container-main {
-        width: 80%;
-    }
 }

@@ -147,22 +147,6 @@
   },
   {
     "ContainingType": "API.Controllers.TasksController",
-    "Method": "GetListByTaskList",
-    "RelativePath": "api/Tasks/{listId}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "listId",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "API.Controllers.TasksController",
     "Method": "Update",
     "RelativePath": "api/Tasks/{taskId}",
     "HttpMethod": "PUT",
@@ -236,6 +220,38 @@
         "Name": "newDueDate",
         "Type": "System.DateTime",
         "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.TasksController",
+    "Method": "GetListByTaskList",
+    "RelativePath": "api/Tasks/ListId/{listId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "listId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.TasksController",
+    "Method": "GetById",
+    "RelativePath": "api/Tasks/TaskId/{taskId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "taskId",
+        "Type": "System.Int32",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []

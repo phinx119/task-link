@@ -39,10 +39,16 @@
                 <div class="task-lists">
                     <div class="list list-by-time-unit">
                         <ul>
-                            <li onclick="displayTasksByTimeUnit('Today', 'day')"><a href="#"><i class="bx bx-sun" id="i1"></i><span>Today</span></a></li>
-                            <li onclick="displayTasksByTimeUnit('This week', 'week')"><a href="#"><i class="bx bx-grid" id="i2"></i><span>This week</span></a></li>
-                            <li onclick="displayTasksByTimeUnit('This month', 'month')"><a href="#"><i class="bx bx-calendar-event" id="i3"></i><span>This month</span></a></li>
-                            <li onclick="displayTasksByTimeUnit('All tasks', 'all')"><a href="#"><i class="bx bx-extension" id="i4"></i><span>All tasks</span></a></li>
+                            <li onclick="displayTasksByTimeUnit('Today', 'day')"><a href="#"><i class="bx bx-sun"
+                                                                                                id="i1"></i><span>Today</span></a>
+                            </li>
+                            <li onclick="displayTasksByTimeUnit('This week', 'week')"><a href="#"><i class="bx bx-grid"
+                                                                                                     id="i2"></i><span>This week</span></a>
+                            </li>
+                            <li onclick="displayTasksByTimeUnit('This month', 'month')"><a href="#"><i
+                                    class="bx bx-calendar-event" id="i3"></i><span>This month</span></a></li>
+                            <li onclick="displayTasksByTimeUnit('All tasks', 'all')"><a href="#"><i
+                                    class="bx bx-extension" id="i4"></i><span>All tasks</span></a></li>
                         </ul>
                     </div>
                     <hr>
@@ -85,10 +91,8 @@
             <div class="container-sub center">
                 <div class="header">
                     <h2 id="header_title">No tasks</h2>
-                    <div class="buttons">
-                        <div></div>
-                        <div></div>
-                        <div></div>
+                    <div id="add-new-task" class="buttons">
+                        <i class="bx bx-plus"></i>
                     </div>
                 </div>
 
@@ -96,16 +100,16 @@
                     <div class="card align" data-task-id="1690064060809" style="opacity: 1;">
                         <input type="checkbox" name="task" id="1690064060809">
                         <div class="marker">
-                        <span>Sample task</span>
-                        <p class="date today">Today</p>
+                            <span>Sample task</span>
+                            <p class="date today">Today</p>
                         </div>
                         <i class="bx bx-trash-alt"></i>
                     </div>
                     <!-- sample data -->
                 </div>
 
-                <div id="add-new-task" class="add-new-task">
-                    <i class="bx bx-plus"></i>
+                <div class="move-up">
+                    <i class="bx bx-up-arrow-alt"></i>
                 </div>
 
             </div>
