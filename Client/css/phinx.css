@@ -1,0 +1,44 @@
+#btn-register {
+    cursor: pointer;
+    color: #595959;
+}
+
+#btn-register:hover {
+    color: #78cbf2;
+}
+
+.bx-info-circle, .bx-trash-alt {
+    cursor: pointer;
+}
+
+.search-holder {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+}
+
+.add-new-list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    border-radius: 10px;
+    background: #dadbdb;
+    cursor: pointer;
+}
+
+.menu {
+    max-height: 495px;
+    overflow-y: auto;
+}
+
+.menu .list ul li {
+    display: flex;
+}
+
+.menu .list ul li div a i {
+    margin: 0 5px;
+}
+
+.list-by-time-unit {
+    margin-bottom: 12px;
+}

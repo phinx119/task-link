@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/phinx.css">
+    <link rel="icon" href="img/icon.png" type="image/png">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <title>TaskLink</title>
+</head>
+
+<body>
+<div id="overlay">
+    <div class="loader"></div>
+</div>
+<div class="home">
+    <div class="container-main">
+
+        <div class="container-left" id="containerLeft">
+
+            <div class="profile center top">
+                <img src="img/avatar.png" alt="">
+                <div>
+                    <p class="name" id="username">Loading...</p>
+                    <p class="email" id="email">Loading...</p>
+                </div>
+            </div>
+
+            <div class="menu center">
+                <div class="search-holder">
+                    <input type="search" name="search" id="search" placeholder=" Search">
+                    <div id="add-new-list" class="add-new-list"><i class="bx bx-plus"></i></div>
+                </div>
+                <div class="task-lists">
+                    <div class="list list-by-time-unit">
+                        <ul>
+                            <li onclick="displayTasksByTimeUnit('Today', 'day')"><a href="#"><i class="bx bx-sun" id="i1"></i><span>Today</span></a></li>
+                            <li onclick="displayTasksByTimeUnit('This week', 'week')"><a href="#"><i class="bx bx-grid" id="i2"></i><span>This week</span></a></li>
+                            <li onclick="displayTasksByTimeUnit('This month', 'month')"><a href="#"><i class="bx bx-calendar-event" id="i3"></i><span>This month</span></a></li>
+                            <li onclick="displayTasksByTimeUnit('All tasks', 'all')"><a href="#"><i class="bx bx-extension" id="i4"></i><span>All tasks</span></a></li>
+                        </ul>
+                    </div>
+                    <hr>
+                    <div class="list list-by-name">
+                        <ul id="list-by-name">
+                            <li id="o-my-list">
+                                <a href="#">
+                                    <i class="bx bx-user-circle" id="i-my-list"></i>
+                                    <span>My List</span>
+                                </a>
+                                <div>
+                                    <a>
+                                        <i class="bx bx-info-circle" id="i-update"></i>
+                                        <i class="bx bx-trash-alt" id="i-delete"></i>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="logout center">
+                <hr>
+                <a href="#" id="logoutLink" onclick="logout()"><i class="bx bx-log-out"></i><span>Logout</span></a>
+            </div>
+
+        </div>
+
+        <div class="container-right">
+
+            <div class="hamburger-container">
+                <div class="burger" id="burgerIcon">
+                    <div class="line"></div>
+                    <div class="line"></div>
+                    <div class="line"></div>
+                </div>
+            </div>
+
+            <div class="container-sub center">
+                <div class="header">
+                    <h2 id="header_title">No tasks</h2>
+                    <div class="buttons">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+
+                <div class="card-holder" id="task-container">
+                    <div class="card align" data-task-id="1690064060809" style="opacity: 1;">
+                        <input type="checkbox" name="task" id="1690064060809">
+                        <div class="marker">
+                        <span>Sample task</span>
+                        <p class="date today">Today</p>
+                        </div>
+                        <i class="bx bx-trash-alt"></i>
+                    </div>
+                    <!-- sample data -->
+                </div>
+
+                <div id="add-new-task" class="add-new-task">
+                    <i class="bx bx-plus"></i>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<script src="lib/jquery/dist/jquery.js"></script>
+<script src="https://unpkg.com/swapy/dist/swapy.min.js"></script>
+<script src="js/script.js"></script>
+<script src="js/user.js"></script>
+<script src="js/task-list.js"></script>
+<script src="js/task.js"></script>
+<script>
+
+    window.addEventListener("load", function () {
+        document.getElementById("overlay").style.display = "none";
+    });
+</script>
+<script>
+
+</script>
+</body>
+
+</html>
