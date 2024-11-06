@@ -1,24 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Code_Practice\\Back-End\\C#.Net\\PRN231\\TaskLink\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{08C98DF3-7ABF-4804-98F1-8C6A64C3DA02}|API\\API.csproj|d:\\code_practice\\back-end\\c#.net\\prn231\\tasklink\\api\\controllers\\taskscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{08C98DF3-7ABF-4804-98F1-8C6A64C3DA02}|API\\API.csproj|solutionrelative:api\\controllers\\taskscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{08C98DF3-7ABF-4804-98F1-8C6A64C3DA02}|API\\API.csproj|d:\\code_practice\\back-end\\c#.net\\prn231\\tasklink\\api\\controllers\\tasklistscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{08C98DF3-7ABF-4804-98F1-8C6A64C3DA02}|API\\API.csproj|solutionrelative:api\\controllers\\tasklistscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{08C98DF3-7ABF-4804-98F1-8C6A64C3DA02}|API\\API.csproj|d:\\code_practice\\back-end\\c#.net\\prn231\\tasklink\\api\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{08C98DF3-7ABF-4804-98F1-8C6A64C3DA02}|API\\API.csproj|solutionrelative:api\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{08C98DF3-7ABF-4804-98F1-8C6A64C3DA02}|API\\API.csproj|d:\\code_practice\\back-end\\c#.net\\prn231\\tasklink\\api\\controllers\\repeatscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{08C98DF3-7ABF-4804-98F1-8C6A64C3DA02}|API\\API.csproj|solutionrelative:api\\controllers\\repeatscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -26,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 150,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -619,55 +602,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:28:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "UsersController.cs",
-              "DocumentMoniker": "D:\\Code_Practice\\Back-End\\C#.Net\\PRN231\\TaskLink\\API\\Controllers\\UsersController.cs",
-              "RelativeDocumentMoniker": "API\\Controllers\\UsersController.cs",
-              "ToolTip": "D:\\Code_Practice\\Back-End\\C#.Net\\PRN231\\TaskLink\\API\\Controllers\\UsersController.cs",
-              "RelativeToolTip": "API\\Controllers\\UsersController.cs",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAywAoAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-04T15:55:13.214Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "TaskListsController.cs",
-              "DocumentMoniker": "D:\\Code_Practice\\Back-End\\C#.Net\\PRN231\\TaskLink\\API\\Controllers\\TaskListsController.cs",
-              "RelativeDocumentMoniker": "API\\Controllers\\TaskListsController.cs",
-              "ToolTip": "D:\\Code_Practice\\Back-End\\C#.Net\\PRN231\\TaskLink\\API\\Controllers\\TaskListsController.cs",
-              "RelativeToolTip": "API\\Controllers\\TaskListsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-04T07:18:33.602Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "TasksController.cs",
-              "DocumentMoniker": "D:\\Code_Practice\\Back-End\\C#.Net\\PRN231\\TaskLink\\API\\Controllers\\TasksController.cs",
-              "RelativeDocumentMoniker": "API\\Controllers\\TasksController.cs",
-              "ToolTip": "D:\\Code_Practice\\Back-End\\C#.Net\\PRN231\\TaskLink\\API\\Controllers\\TasksController.cs",
-              "RelativeToolTip": "API\\Controllers\\TasksController.cs",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAywDAAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-04T07:18:34.322Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "RepeatsController.cs",
-              "DocumentMoniker": "D:\\Code_Practice\\Back-End\\C#.Net\\PRN231\\TaskLink\\API\\Controllers\\RepeatsController.cs",
-              "RelativeDocumentMoniker": "API\\Controllers\\RepeatsController.cs",
-              "ToolTip": "D:\\Code_Practice\\Back-End\\C#.Net\\PRN231\\TaskLink\\API\\Controllers\\RepeatsController.cs",
-              "RelativeToolTip": "API\\Controllers\\RepeatsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-04T07:18:32.976Z"
             }
           ]
         },

@@ -265,3 +265,4 @@ D:\Code_Practice\Back-End\C#.Net\PRN231\TaskLink\API\obj\Debug\net6.0\refint\API
 D:\Code_Practice\Back-End\C#.Net\PRN231\TaskLink\API\obj\Debug\net6.0\API.pdb
 D:\Code_Practice\Back-End\C#.Net\PRN231\TaskLink\API\obj\Debug\net6.0\API.genruntimeconfig.cache
 D:\Code_Practice\Back-End\C#.Net\PRN231\TaskLink\API\obj\Debug\net6.0\ref\API.dll
+D:\Code_Practice\Back-End\C#.Net\PRN231\TaskLink\API\obj\Debug\net6.0\API.sourcelink.json
