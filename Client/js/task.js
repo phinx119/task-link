@@ -50,8 +50,8 @@ function isTooLate(dateString) {
 
 function formatDate(date) {
     const options = {
-        year: 'numeric', 
-        month: '2-digit', 
+        year: 'numeric',
+        month: '2-digit',
         day: '2-digit',
         weekday: 'short'
     };
@@ -70,6 +70,13 @@ function displayTasks(html, receivedData) {
     } else {
         $.each(receivedData, function (index, task) {
             const dueDate = new Date(task.dueDate)
+            
+            if (isTooLate(dueDate)) {
+                preferences.checkTime = 0;
+                resetStreak();
+                animationIncreaseStreak()
+            }
+            
             html += `                
                 <div class="card align">
                     <input type="checkbox" name="task" onclick="updateTaskDueDate(${task.taskId})">
@@ -481,7 +488,7 @@ function updateTask(taskId) {
                         cancel: 'Cancel',
                         confirm: 'Save',
                     },
-                    closeOnClickOutside: false,
+                    closeOnClickOutside: true,
                 }).then((result) => {
                     if (result && result.dismiss !== 'cancel') {
                         // Get input value
@@ -567,6 +574,7 @@ function updateTaskDueDate(taskId) {
             let currentDate = new Date();
 
             // Set new due date base on repeat type
+            let dueDate = new Date(receivedData.dueDate);
             let newDueDate = new Date(receivedData.dueDate);
             // Set it to GMT+7
             newDueDate.setHours(currentDateTime.getHours() + 7);
@@ -581,17 +589,17 @@ function updateTaskDueDate(taskId) {
                     //console.log(receivedData);
 
                     // Update due date to the next closest future occurrence base on repeat time unit
-                     do {
+                    do {
                         switch (receivedData.unit) {
-                        case 'Day':
-                            newDueDate.setDate(newDueDate.getDate() + receivedData.duration);
-                            break;
-                        case 'Month':
-                            newDueDate.setMonth(newDueDate.getMonth() + receivedData.duration);
-                            break;
-                        case 'Year':
-                            newDueDate.setFullYear(newDueDate.getFullYear() + receivedData.duration);
-                            break;
+                            case 'Day':
+                                newDueDate.setDate(newDueDate.getDate() + receivedData.duration);
+                                break;
+                            case 'Month':
+                                newDueDate.setMonth(newDueDate.getMonth() + receivedData.duration);
+                                break;
+                            case 'Year':
+                                newDueDate.setFullYear(newDueDate.getFullYear() + receivedData.duration);
+                                break;
                         }
                     } while (newDueDate <= currentDate)
 
@@ -604,9 +612,55 @@ function updateTaskDueDate(taskId) {
                         success: function (receivedData) {
                             //console.log(receivedData);
 
-                            // Reload tasks if response ok
-                            displayTasksByTimeUnit('All tasks', 'all');
-                            swal('Success', 'Update task successful', 'success');
+                            if (preferences.checkTime === 0 && dueDate.getDate() === currentDate.getDate()) {
+                                // Call API to update check time
+                                $.ajax({
+                                    async: true,
+                                    type: 'PUT',
+                                    url: `${apiUrl}Users/CheckTime/${preferences.userId}`,
+                                    contentType: 'application/json',
+                                    success: function (receivedData) {
+                                        //console.log(receivedData);
+                                        
+                                        preferences.checkTime = 1;
+
+                                        // Call API to update streak
+                                        $.ajax({
+                                            async: true,
+                                            type: 'PUT',
+                                            url: `${apiUrl}Users/UpdateStreak/${preferences.userId}`,
+                                            contentType: 'application/json',
+                                            success: function (receivedData) {
+                                                //console.log(receivedData);
+
+                                                // Set data to local storage and display them
+                                                setUserPreferences(receivedData.userId, receivedData.username, receivedData.email, receivedData.checkTime, receivedData.streak);
+                                                displayProfileData();
+
+                                                animationIncreaseStreak()
+
+                                                // Reload tasks if response ok
+                                                displayTasksByTimeUnit('All tasks', 'all');
+                                                swal('Success', `Update streak - ${preferences.checkTime}`, 'success');
+                                            },
+                                            error: function (xhr) {
+                                                //console.error(xhr.responseText);
+
+                                                swal('Error', `${xhr.responseText}`, 'error');
+                                            }
+                                        });
+                                    },
+                                    error: function (xhr) {
+                                        //console.error(xhr.responseText);
+
+                                        swal('Error', `${xhr.responseText}`, 'error');
+                                    }
+                                });
+                            } else {
+                                // Reload tasks if response ok
+                                displayTasksByTimeUnit('All tasks', 'all');
+                                swal('Success', `Not update streak - ${preferences.checkTime}`, 'success');
+                            }
                         },
                         error: function (xhr) {
                             //console.error(xhr.responseText);

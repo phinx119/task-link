@@ -25,7 +25,7 @@ namespace API.Controllers
             return Ok(taskLists);
         }
 
-        // GET: get list by time unit
+        // GET: get list by user id
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetListByUserId(int userId)
         {

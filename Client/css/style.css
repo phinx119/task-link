@@ -246,7 +246,9 @@ body {
 }
 
 .profile {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+    align-items: center;
     color: #3a3a3a;
 }
 
@@ -268,9 +270,6 @@ body {
 
 .profile div {
     padding-left: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -26,6 +26,21 @@ namespace API.Controllers
             return Ok(users);
         }
 
+        // GET: get by user id
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetListByUserId(int userId)
+        {
+            // get by user id
+            var user = await context.Users.FindAsync(userId);
+            // check if user not existing
+            if (user == null)
+            {
+                return BadRequest("User not exist");
+            }
+
+            return Ok(user);
+        }
+
         // GET: login by username and password
         [HttpGet("Login")]
         public async Task<IActionResult> Login(string username, string password)
@@ -89,8 +104,8 @@ namespace API.Controllers
         }
 
         // PUT: update check time
-        [HttpPut("CheckTime")]
-        public async Task<IActionResult> UpdateCheckTime(int userId, int checkTime)
+        [HttpPut("CheckTime/{userId}")]
+        public async Task<IActionResult> UpdateCheckTime(int userId)
         {
             // get user by user id
             var user = await context.Users.FindAsync(userId);
@@ -101,15 +116,37 @@ namespace API.Controllers
             }
 
             // update check time
-            user.CheckTime = checkTime;
+            user.CheckTime = 1;
             await context.SaveChangesAsync();
 
             return Ok(user);
         }
 
         // PUT: update streak
-        [HttpPut("Streak")]
+        [HttpPut("UpdateStreak/{userId}")]
         public async Task<IActionResult> UpdateStreak(int userId)
+        {
+            // get user by user id
+            var user = await context.Users.FindAsync(userId);
+            // check if user not existing
+            if (user == null)
+            {
+                return BadRequest("User not exist.");
+            }
+
+            if (user.CheckTime == 1)
+            {
+                user.Streak += 1;
+            }
+
+            await context.SaveChangesAsync();
+
+            return Ok(user);
+        }
+
+        // PUT: update streak
+        [HttpPut("ResetStreak/{userId}")]
+        public async Task<IActionResult> ResetStreak(int userId)
         {
             // get user by user id
             var user = await context.Users.FindAsync(userId);
@@ -123,15 +160,18 @@ namespace API.Controllers
             var currentDate = DateTime.Now;
             var tasks = await context.Tasks
                 .Where(t => t.List.UserId == userId &&
-                            t.DueDate.Date == currentDate.Date
+                            t.DueDate.Date == currentDate.Date &&
+                            !t.Status.Equals("Completed")
                 ).ToListAsync();
 
             // update streak
-            if (tasks.Count == 0)
+            if (tasks.Count != 0)
             {
-                user.Streak += 1;
-                await context.SaveChangesAsync();
+                user.Streak = 0;
             }
+
+            user.CheckTime = 0;
+            await context.SaveChangesAsync();
 
             return Ok(user);
         }

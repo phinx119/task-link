@@ -36,7 +36,7 @@ function displayTaskList() {
                     taskListsHtml += `                
                         <li>
                             <a href="#" onclick="displayTasksByTaskList(${taskList.listId}, '${taskList.listName}')">
-                                <i class="bx bx-user-circle"></i>
+                                <i class="bx bx-task"></i>
                                 <span>${taskList.listName}</span>
                             </a>
                             <div>

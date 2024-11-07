@@ -269,7 +269,7 @@
   {
     "ContainingType": "API.Controllers.UsersController",
     "Method": "UpdateCheckTime",
-    "RelativePath": "api/Users/CheckTime",
+    "RelativePath": "api/Users/CheckTime/{userId}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -277,12 +277,7 @@
       {
         "Name": "userId",
         "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "checkTime",
-        "Type": "System.Int32",
-        "IsRequired": false
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
@@ -326,8 +321,8 @@
   },
   {
     "ContainingType": "API.Controllers.UsersController",
-    "Method": "UpdateStreak",
-    "RelativePath": "api/Users/Streak",
+    "Method": "ResetStreak",
+    "RelativePath": "api/Users/ResetStreak/{userId}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -335,7 +330,23 @@
       {
         "Name": "userId",
         "Type": "System.Int32",
-        "IsRequired": false
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.UsersController",
+    "Method": "UpdateStreak",
+    "RelativePath": "api/Users/UpdateStreak/{userId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []

@@ -47,7 +47,7 @@ namespace API.Controllers
             var currentDate = DateTime.Now;
 
             // create query get by id
-            IQueryable<Models.Task> query = context.Tasks.Where(t => t.List.UserId == userId);
+            IQueryable<Models.Task> query = context.Tasks.Where(t => t.List.UserId == userId && !t.Status.Equals("Completed"));
 
             // add get by time unit (day, week, month, all) to query
             switch (timeUnit.ToLower())
@@ -94,7 +94,7 @@ namespace API.Controllers
             }
 
             // get list by list id
-            var tasks = await context.Tasks.Where(t => t.ListId == taskList.ListId).ToListAsync();
+            var tasks = await context.Tasks.Where(t => t.ListId == taskList.ListId && !t.Status.Equals("Completed")).ToListAsync();
 
             return Ok(tasks);
         }
