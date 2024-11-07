@@ -39,6 +39,10 @@
     margin: 0 5px;
 }
 
+.too-late {
+    color: #ff4646;
+}
+
 .list-by-time-unit {
     margin-bottom: 12px;
 }

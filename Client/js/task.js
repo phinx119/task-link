@@ -20,7 +20,7 @@ function manageTask() {
         priority: null,
         status: null,
     };
-    
+
     // Handle create new task
     $('#add-new-task').on('click', function () {
         addNewTask(sendingData);
@@ -35,11 +35,31 @@ function manageTask() {
 //  ██████  ███████    ██
 
 // Check if a date is today
-const isToday = (dateString) => {
+function isToday(dateString) {
     const today = new Date();
     const date = new Date(dateString);
     return date.toDateString() === today.toDateString();
 };
+
+// Check if a date is today
+function isTooLate(dateString) {
+    const today = new Date();
+    const date = new Date(dateString);
+    return date < today;
+};
+
+function formatDate(date) {
+    const options = {
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        weekday: 'short'
+    };
+    const formattedDate = isToday(date) ? 'Today' : new Intl.DateTimeFormat('en-GB', options).format(date).replace(',', '');
+    const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+    return `${formattedDate} - ${formattedTime}`;
+}
 
 // Display tasks and set data into task card
 function displayTasks(html, receivedData) {
@@ -51,12 +71,12 @@ function displayTasks(html, receivedData) {
         $.each(receivedData, function (index, task) {
             const dueDate = new Date(task.dueDate)
             html += `                
-                <div class="card align" data-task-id="${task.taskId}">
-                    <input type="checkbox" name="task" id="${task.taskId}">
+                <div class="card align">
+                    <input type="checkbox" name="task" onclick="updateTaskDueDate(${task.taskId})">
                     <div>
                         <span>${task.title}</span>
-                        <p id="taskDate" class="date ${isToday(task.dueDate) ? 'today' : ''}">
-                            ${isToday(task.dueDate) ? 'Today' : '<i class="bx bx-calendar-alt"></i> ' + dueDate.toDateString()} - ${dueDate.toTimeString()}
+                        <p id="taskDate" class="date ${isToday(task.dueDate) ? 'today' : ''} ${isTooLate(task.dueDate) ? 'too-late' : ''}">                        
+                            <i class="bx bx-calendar-alt"></i> ${formatDate(dueDate)}
                         </p>
                     </div>
                     <i class="bx bx-info-circle" onclick="updateTask(${task.taskId})"></i>
@@ -65,7 +85,7 @@ function displayTasks(html, receivedData) {
             `;
         });
     }
-    
+
     // Set html
     $('#task-container').html(html);
 
@@ -77,7 +97,7 @@ function displayTasks(html, receivedData) {
 function displayTasksByTimeUnit(timeUnit, timeUnitUrl) {
     // Set header title
     $('#header_title').html(timeUnit);
-    
+
     // Set variable
     let tasksHtml = '';
 
@@ -105,7 +125,7 @@ function displayTasksByTimeUnit(timeUnit, timeUnitUrl) {
 function displayTasksByTaskList(listId, listName) {
     // Set header title
     $('#header_title').html(listName);
-    
+
     // Set variable
     let tasksHtml = '';
 
@@ -139,7 +159,7 @@ function displayTasksByTaskList(listId, listName) {
 function searchTask() {
     // Set header title
     $('#header_title').html('Result');
-    
+
     // Set variable
     let searchText = $('#search').val().trim().toLowerCase();
     let tasksHtml = '';
@@ -159,13 +179,13 @@ function searchTask() {
                     count++; // Increase number of task
                     // Parse due date to date type
                     const dueDate = new Date(task.dueDate)
-                    
+
                     tasksHtml += `                
-                        <div class="card align" data-task-id="${task.taskId}">
-                            <input type="checkbox" name="task" id="${task.taskId}">
+                        <div class="card align">
+                            <input type="checkbox" name="task" onclick="updateTaskDueDate(${task.taskId})">
                             <div>
                                 <span>${task.title}</span>
-                                <p id="taskDate" class="date ${isToday(task.dueDate) ? 'today' : ''}">
+                                <p id="taskDate" class="date ${isToday(task.dueDate) ? 'today' : ''}" ${isTooLate(task.dueDate) ? 'too-late' : ''}">
                                     ${isToday(task.dueDate) ? 'Today' : '<i class="bx bx-calendar-alt"></i> ' + dueDate.toDateString()} - ${dueDate.toTimeString()}
                                 </p>
                             </div>
@@ -175,7 +195,7 @@ function searchTask() {
                     `;
                 }
             });
-            
+
             // Check if not found
             if (count === 0) {
                 swal('Info', 'No task found', 'info');
@@ -183,7 +203,7 @@ function searchTask() {
 
             // Clear search bar
             $('#search').val('');
-            
+
             // Set html
             $('#task-container').html(tasksHtml);
 
@@ -206,7 +226,7 @@ let listOption;
 function loadListOption(listId) {
     // Set to empty
     listOption = '';
-    
+
     // Call API to get task lists and set to option tab
     $.ajax({
         async: true,
@@ -338,8 +358,13 @@ function addNewTask(sendingData) {
                 const note = document.getElementById('swal-input-note').value;
                 const list = document.getElementById('swal-input-list').value;
                 const priority = document.getElementById('swal-input-priority').value;
-                const dueDate = document.getElementById('swal-input-due-date').value;
+                const dueDateString = document.getElementById('swal-input-due-date').value;
                 const repeat = document.getElementById('swal-input-repeat').value;
+
+                // Set status ('Pending', 'In Progress', 'Completed') base on due date
+                let dueDate = new Date(dueDateString);
+                let currentDateTime = new Date();
+                let status = dueDate < currentDateTime ? 'Pending' : 'In Progress';
 
                 // Validate input
                 if (title && list && priority && dueDate && repeat) {
@@ -348,10 +373,10 @@ function addNewTask(sendingData) {
                         listId: list,
                         title: title,
                         note: note,
-                        dueDate: dueDate,
+                        dueDate: dueDateString,
                         repeatId: repeat,
                         priority: priority,
-                        status: 'Pending',
+                        status: status,
                     };
                     $.ajax({
                         async: true,
@@ -464,8 +489,13 @@ function updateTask(taskId) {
                         const note = document.getElementById('swal-input-note').value;
                         const list = document.getElementById('swal-input-list').value;
                         const priority = document.getElementById('swal-input-priority').value;
-                        const dueDate = document.getElementById('swal-input-due-date').value;
+                        const dueDateString = document.getElementById('swal-input-due-date').value;
                         const repeat = document.getElementById('swal-input-repeat').value;
+
+                        // Set status ('Pending', 'In Progress', 'Completed') base on due date
+                        let dueDate = new Date(dueDateString);
+                        let currentDateTime = new Date();
+                        let status = dueDate < currentDateTime ? 'Pending' : 'In Progress';
 
                         // Validate input
                         if (title && list && priority && dueDate && repeat) {
@@ -474,10 +504,10 @@ function updateTask(taskId) {
                                 listId: list,
                                 title: title,
                                 note: note,
-                                dueDate: dueDate,
+                                dueDate: dueDateString,
                                 repeatId: repeat,
                                 priority: priority,
-                                status: receivedData.status,
+                                status: status,
                             };
 
                             // Call API to update task
@@ -492,10 +522,7 @@ function updateTask(taskId) {
 
                                     // Reload tasks if response ok
                                     displayTasksByTimeUnit('All tasks', 'all');
-                                    swal('Success', 'Update task successful', 'success').then(() => {
-                                        // Reopen the update dialog
-                                        updateTask(taskId);
-                                    });
+                                    swal('Success', 'Update task successful', 'success');
                                 },
                                 error: function (xhr) {
                                     //console.error(xhr.responseText);
@@ -525,61 +552,82 @@ function updateTask(taskId) {
 }
 
 // Update status due date and status when click the checkbox
-function updateTaskStatus() {
-    // Handle checkbox change
-    if (event.target.type === 'checkbox' && event.target.name === 'task') {
-        const taskId = event.target.id;
-        const task = tasks.find((task) => task.id.toString() === taskId);
-        if (task) {
-            task.completed = event.target.checked;
-            localStorage.setItem(task.id, JSON.stringify(task));
-            const marker = event.target.nextElementSibling;
-            if (marker.classList.contains('marker')) {
-                marker.classList.toggle('done', task.completed);
-            }
-        }
-    }
+function updateTaskDueDate(taskId) {
+    // Call API to get task by id
+    $.ajax({
+        async: true,
+        type: 'GET',
+        url: `${apiUrl}Tasks/TaskId/${taskId}`,
+        dataType: 'json',
+        success: function (receivedData) {
+            //console.log(receivedData);
 
-    // Handle update icon click
-    if (event.target.classList.contains('bx-info-circle')) {
-        const taskId = event.target.closest('.card').dataset.taskId;
-        updateTask(taskId);
-    }
+            // Set variable
+            let taskId = receivedData.taskId;
+            let currentDate = new Date();
 
-    if (event.target.classList.contains('date')) {
-        const taskId = event.target.closest('.card').dataset.taskId;
-        const task = tasks.find((task) => task.id.toString() === taskId);
+            // Set new due date base on repeat type
+            let newDueDate = new Date(receivedData.dueDate);
+            // Set it to GMT+7
+            newDueDate.setHours(currentDateTime.getHours() + 7);
 
-        if (task) {
-            // Trigger the date picker
-            document.getElementById('hiddenDatePicker').showPicker();
+            // Call API to set new due date
+            $.ajax({
+                async: true,
+                type: 'GET',
+                url: `${apiUrl}Repeats/${receivedData.repeatId}`,
+                contentType: 'application/json',
+                success: function (receivedData) {
+                    //console.log(receivedData);
 
-            // Listen for changes in the date picker
-            document.getElementById('hiddenDatePicker').addEventListener('change', function () {
-                const selectedDate = this.value;
+                    // Update due date to the next closest future occurrence base on repeat time unit
+                     do {
+                        switch (receivedData.unit) {
+                        case 'Day':
+                            newDueDate.setDate(newDueDate.getDate() + receivedData.duration);
+                            break;
+                        case 'Month':
+                            newDueDate.setMonth(newDueDate.getMonth() + receivedData.duration);
+                            break;
+                        case 'Year':
+                            newDueDate.setFullYear(newDueDate.getFullYear() + receivedData.duration);
+                            break;
+                        }
+                    } while (newDueDate <= currentDate)
 
-                // Ask for confirmation before updating the date
-                swal({
-                    title: 'Are you sure?',
-                    text: `Update the due date from ${task.date} to ${selectedDate}.`,
-                    icon: 'info',
-                    buttons: ['Cancel', 'Yes'],
-                }).then((willChangeDate) => {
-                    if (willChangeDate) {
-                        // Update the date in local storage
-                        task.date = selectedDate;
-                        localStorage.setItem(taskId, JSON.stringify(task));
+                    // Call API to update task due date
+                    $.ajax({
+                        async: true,
+                        type: 'PUT',
+                        url: `${apiUrl}Tasks/DueDate/${taskId}?newDueDate=${newDueDate.toISOString().slice(0, 16)}`,
+                        contentType: 'application/json',
+                        success: function (receivedData) {
+                            //console.log(receivedData);
 
-                        // Refresh the display
-                        displayTasks(currentSection);
-                    } else {
-                        // Reset the date picker if the user cancels
-                        document.getElementById('hiddenDatePicker').value = '';
-                    }
-                });
+                            // Reload tasks if response ok
+                            displayTasksByTimeUnit('All tasks', 'all');
+                            swal('Success', 'Update task successful', 'success');
+                        },
+                        error: function (xhr) {
+                            //console.error(xhr.responseText);
+
+                            swal('Error', `${xhr.responseText}`, 'error');
+                        }
+                    });
+                },
+                error: function (xhr) {
+                    //console.error(xhr.responseText);
+
+                    swal('Error', `${xhr.responseText}`, 'error');
+                }
             });
+        },
+        error: function (xhr) {
+            //console.error(xhr.responseText);
+
+            swal('Error', `${xhr.responseText}`, 'error');
         }
-    }
+    });
 }
 
 // Delete task ---------------------------------------------------------------------------------------------------------
@@ -642,4 +690,5 @@ document.body.addEventListener('click', (event) => {
         burgerIcon.classList.remove('cross');
     }
 });
+
 // ---------------------------------------------------------------------------------------------------------------------

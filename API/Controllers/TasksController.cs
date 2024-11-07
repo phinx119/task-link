@@ -186,7 +186,7 @@ namespace API.Controllers
 
         // PUT: update task due date by task id
         [HttpPut("DueDate/{taskId}")]
-        public async Task<IActionResult> UpdateDueDate(int taskId, DateTime newDueDate)
+        public async Task<IActionResult> UpdateDueDate(int taskId, string newDueDate)
         {
             // get by task id
             var task = await context.Tasks.FindAsync(taskId);
@@ -197,7 +197,8 @@ namespace API.Controllers
             }
 
             // update task            
-            task.DueDate = newDueDate;
+            task.DueDate = DateTime.Parse(newDueDate);
+            task.Status = task.RepeatId == 1 ? "Completed" : "In Progress";
             task.UpdatedAt = DateTime.Now;
 
             // save change
