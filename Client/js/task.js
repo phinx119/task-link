@@ -1,7 +1,7 @@
 // Manage task ---------------------------------------------------------------------------------------------------------
 function manageTask() {
     // Display task
-    displayTasksByTimeUnit('All tasks', 'all');
+    displayTasksByTimeUnit('Today', 'day');
 
     // Handle search task by title
     $('#search').on('keypress', function (e) {
@@ -11,7 +11,7 @@ function manageTask() {
     });
 
     // Create sample sending data to create new task
-    let sendingData = {
+    let requestBody = {
         listId: null,
         title: '',
         note: '',
@@ -23,7 +23,7 @@ function manageTask() {
 
     // Handle create new task
     $('#add-new-task').on('click', function () {
-        addNewTask(sendingData);
+        addNewTask(requestBody);
     });
 }
 
@@ -62,21 +62,21 @@ function formatDate(date) {
 }
 
 // Display tasks and set data into task card
-function displayTasks(html, receivedData) {
-    //console.log(receivedData);
+function displayTasks(html, response) {
+    //console.log(response);
 
-    if (receivedData == null || receivedData.length === 0) {
+    if (response == null || response.length === 0) {
         swal('Info', 'No task found', 'info');
     } else {
-        $.each(receivedData, function (index, task) {
+        $.each(response, function (index, task) {
             const dueDate = new Date(task.dueDate)
-            
+
             if (isTooLate(dueDate)) {
                 preferences.checkTime = 0;
                 resetStreak();
-                animationIncreaseStreak()
+                animationUpdateStreak()
             }
-            
+
             html += `                
                 <div class="card align">
                     <input type="checkbox" name="task" onclick="updateTaskDueDate(${task.taskId})">
@@ -104,6 +104,10 @@ function displayTasks(html, receivedData) {
 function displayTasksByTimeUnit(timeUnit, timeUnitUrl) {
     // Set header title
     $('#header_title').html(timeUnit);
+    $('#additional-info').html(timeUnitUrl);
+    
+    // Clear search bar
+    $('#search').val('');
 
     // Set variable
     let tasksHtml = '';
@@ -112,13 +116,13 @@ function displayTasksByTimeUnit(timeUnit, timeUnitUrl) {
     $.ajax({
         async: true,
         type: 'GET',
-        url: `${apiUrl}Tasks/${preferences.userId}/${timeUnitUrl}`,
+        url: `${apiUrl}/Tasks/${preferences.userId}/${timeUnitUrl}`,
         dataType: 'json',
-        success: function (receivedData) {
-            //console.log(receivedData);
+        success: function (response) {
+            //console.log(response);
 
             // Display task if response ok
-            displayTasks(tasksHtml, receivedData);
+            displayTasks(tasksHtml, response);
         },
         error: function (xhr) {
             //console.error(xhr.responseText);
@@ -132,6 +136,10 @@ function displayTasksByTimeUnit(timeUnit, timeUnitUrl) {
 function displayTasksByTaskList(listId, listName) {
     // Set header title
     $('#header_title').html(listName);
+    $('#additional-info').html(listId);
+    
+    // Clear search bar
+    $('#search').val('');
 
     // Set variable
     let tasksHtml = '';
@@ -140,13 +148,13 @@ function displayTasksByTaskList(listId, listName) {
     $.ajax({
         async: true,
         type: 'GET',
-        url: `${apiUrl}Tasks/ListId/${listId}`,
+        url: `${apiUrl}/Tasks/ListId/${listId}`,
         dataType: 'json',
-        success: function (receivedData) {
-            //console.log(receivedData);
+        success: function (response) {
+            //console.log(response);
 
             // Display task if response ok
-            displayTasks(tasksHtml, receivedData);
+            displayTasks(tasksHtml, response);
         },
         error: function (xhr) {
             //console.error(xhr.responseText);
@@ -156,6 +164,22 @@ function displayTasksByTaskList(listId, listName) {
     });
 }
 
+// Reload task list after modify
+function reloadTaskList() {
+    const listName = $('#header_title').html();
+    const additionalInfo = $('#additional-info').html();
+    
+    if (listName === 'Result') {
+        const searchInput = $('#search').val().trim().toLowerCase();
+        searchTask(searchInput);
+    } else if (listName === 'Today' || listName === 'This week' || listName === 'This month' || listName === 'All tasks') {
+        displayTasksByTimeUnit(listName, additionalInfo);
+    } else {
+        displayTasksByTaskList(additionalInfo, listName);
+    }
+
+}
+
 // Search task ---------------------------------------------------------------------------------------------------------
 // ███████ ███████  █████  ██████   ██████ ██   ██
 // ██      ██      ██   ██ ██   ██ ██      ██   ██
@@ -163,12 +187,12 @@ function displayTasksByTaskList(listId, listName) {
 //      ██ ██      ██   ██ ██   ██ ██      ██   ██
 // ███████ ███████ ██   ██ ██   ██  ██████ ██   ██
 
-function searchTask() {
+function searchTask(searchInput) {
     // Set header title
     $('#header_title').html('Result');
 
     // Set variable
-    let searchText = $('#search').val().trim().toLowerCase();
+    let searchText = !searchInput ? $('#search').val().trim().toLowerCase() : searchInput;
     let tasksHtml = '';
     let count = 0;
 
@@ -176,12 +200,12 @@ function searchTask() {
     $.ajax({
         async: true,
         type: 'GET',
-        url: `${apiUrl}Tasks`,
+        url: `${apiUrl}/Tasks`,
         dataType: 'json',
-        success: function (receivedData) {
-            //console.log(receivedData);
+        success: function (response) {
+            //console.log(response);
 
-            $.each(receivedData, function (index, task) {
+            $.each(response, function (index, task) {
                 if (task.title.toLowerCase().includes(searchText.toLowerCase())) {
                     count++; // Increase number of task
                     // Parse due date to date type
@@ -207,9 +231,6 @@ function searchTask() {
             if (count === 0) {
                 swal('Info', 'No task found', 'info');
             }
-
-            // Clear search bar
-            $('#search').val('');
 
             // Set html
             $('#task-container').html(tasksHtml);
@@ -238,15 +259,15 @@ function loadListOption(listId) {
     $.ajax({
         async: true,
         type: 'GET',
-        url: `${apiUrl}TaskLists/${preferences.userId}`,
+        url: `${apiUrl}/TaskLists/${preferences.userId}`,
         dataType: 'json',
-        success: function (receivedData) {
-            //console.log(receivedData);
+        success: function (response) {
+            //console.log(response);
 
-            if (receivedData == null || receivedData.length === 0) {
+            if (response == null || response.length === 0) {
                 swal('Info', 'No task list found', 'info');
             } else {
-                $.each(receivedData, function (index, taskList) {
+                $.each(response, function (index, taskList) {
                     listOption += `<option value="${taskList.listId}" ${taskList.listId === listId ? 'selected' : ''}>${taskList.listName}</option>`;
                 });
             }
@@ -270,15 +291,15 @@ function loadRepeatOption(repeatId) {
     $.ajax({
         async: true,
         type: 'GET',
-        url: `${apiUrl}Repeats`,
+        url: `${apiUrl}/Repeats`,
         dataType: 'json',
-        success: function (receivedData) {
-            //console.log(receivedData);
+        success: function (response) {
+            //console.log(response);
 
-            if (receivedData == null || receivedData.length === 0) {
+            if (response == null || response.length === 0) {
                 swal('Info', 'No repeat option found', 'info');
             } else {
-                $.each(receivedData, function (index, repeat) {
+                $.each(response, function (index, repeat) {
                     repeatOption += `<option value="${repeat.repeatId}" ${repeat.repeatId === repeatId ? 'selected' : ''}>${repeat.repeatName}</option>`;
                 });
             }
@@ -291,10 +312,13 @@ function loadRepeatOption(repeatId) {
     });
 }
 
-// Format current date and time to set input value
-let currentDateTime = new Date();
-currentDateTime.setHours(currentDateTime.getHours() + 7);
-let formattedCurrentDateTime = currentDateTime.toISOString().slice(0, 16);
+// Get status base on due date
+function getStatus(dueDateString) {
+    // Set status ('Pending', 'In Progress', 'Completed') base on due date
+    const currentDateTime = new Date();
+    let dueDate = new Date(dueDateString);
+    return  dueDate < currentDateTime ? 'Pending' : 'In Progress';
+}
 
 // Create new task -----------------------------------------------------------------------------------------------------
 // ██████   ██████  ███████ ████████
@@ -303,10 +327,15 @@ let formattedCurrentDateTime = currentDateTime.toISOString().slice(0, 16);
 // ██      ██    ██      ██    ██
 // ██       ██████  ███████    ██
 
-function addNewTask(sendingData) {
+function addNewTask(requestBody) {
+    // Format current date and time to set input value
+    const currentDateTime = new Date();
+    currentDateTime.setHours(currentDateTime.getHours() + 7);
+    let formattedCurrentDateTime = currentDateTime.toISOString().slice(0, 16);
+    
     // Load and set selected to option
-    loadListOption(sendingData.listId == null ? 1 : sendingData.listId);
-    loadRepeatOption(sendingData.repeatId == null ? 1 : sendingData.repeatId);
+    loadListOption(requestBody.listId == null ? 1 : requestBody.listId);
+    loadRepeatOption(requestBody.repeatId == null ? 1 : requestBody.repeatId);
 
     // Display create new task dialog with delay
     setTimeout(function () {
@@ -317,11 +346,11 @@ function addNewTask(sendingData) {
                 attributes: {
                     innerHTML: `
                         <div class="form__group field">
-                            <input type="text" class="form__field" placeholder="Title" id="swal-input-title" value="${sendingData.title}" required>
+                            <input type="text" class="form__field" placeholder="Title" id="swal-input-title" value="${requestBody.title}" required>
                             <label for="swal-input-title" class="form__label">Title</label>
                         </div>
                         <div class="form__group field">
-                            <input type="text" class="form__field" placeholder="Note" id="swal-input-note" value="${sendingData.note}">
+                            <input type="text" class="form__field" placeholder="Note" id="swal-input-note" value="${requestBody.note}">
                             <label for="swal-input-note" class="form__label">Note</label>
                         </div>
                         <div style="display: flex; width: 95%">
@@ -333,15 +362,15 @@ function addNewTask(sendingData) {
                             </div>
                             <div class="form__group field">
                                 <select class="form__field" id="swal-input-priority">
-                                    <option value="Low" ${sendingData.priority === 'Low' ? 'selected' : ''}>Low</option>
-                                    <option value="Medium" ${sendingData.priority === 'Medium' ? 'selected' : ''}>Medium</option>
-                                    <option value="High" ${sendingData.priority === 'High' ? 'selected' : ''}>High</option>
+                                    <option value="Low" ${requestBody.priority === 'Low' ? 'selected' : ''}>Low</option>
+                                    <option value="Medium" ${requestBody.priority === 'Medium' ? 'selected' : ''}>Medium</option>
+                                    <option value="High" ${requestBody.priority === 'High' ? 'selected' : ''}>High</option>
                                 </select>
                                 <label for="swal-input-priority" class="form__label">Priority</label>
                             </div>          
                         </div>
                         <div class="form__group field">
-                            <input type="datetime-local" class="form__field" placeholder="Due Date" id="swal-input-due-date" value="${sendingData.dueDate == null ? formattedCurrentDateTime : sendingData.dueDate}" required>
+                            <input type="datetime-local" class="form__field" placeholder="Due Date" id="swal-input-due-date" value="${requestBody.dueDate == null ? formattedCurrentDateTime : requestBody.dueDate}" required>
                             <label for="swal-input-due-date" class="form__label">Due Date</label>
                         </div>
                         <div class="form__group field">
@@ -367,35 +396,30 @@ function addNewTask(sendingData) {
                 const priority = document.getElementById('swal-input-priority').value;
                 const dueDateString = document.getElementById('swal-input-due-date').value;
                 const repeat = document.getElementById('swal-input-repeat').value;
-
-                // Set status ('Pending', 'In Progress', 'Completed') base on due date
-                let dueDate = new Date(dueDateString);
-                let currentDateTime = new Date();
-                let status = dueDate < currentDateTime ? 'Pending' : 'In Progress';
-
+                
                 // Validate input
-                if (title && list && priority && dueDate && repeat) {
+                if (title && list && priority && dueDateString && repeat) {
                     // Call API to create new task
-                    let sendingData = {
+                    let requestBody = {
                         listId: list,
                         title: title,
                         note: note,
                         dueDate: dueDateString,
                         repeatId: repeat,
                         priority: priority,
-                        status: status,
+                        status: getStatus(dueDateString),
                     };
                     $.ajax({
                         async: true,
                         type: 'POST',
-                        url: `${apiUrl}Tasks`,
+                        url: `${apiUrl}/Tasks`,
                         contentType: 'application/json',
-                        data: JSON.stringify(sendingData),
-                        success: function (receivedData) {
-                            //console.log(receivedData);
+                        data: JSON.stringify(requestBody),
+                        success: function (response) {
+                            //console.log(response);
 
                             // Reload tasks if response ok
-                            displayTasksByTimeUnit('All tasks', 'all');
+                            reloadTaskList();
                             swal('Success', 'Create task successful', 'success');
                         },
                         error: function (xhr) {
@@ -403,14 +427,14 @@ function addNewTask(sendingData) {
 
                             swal('Error', `${xhr.responseText}`, 'error').then(() => {
                                 // Reopen the create dialog if response error
-                                addNewTask(sendingData);
+                                addNewTask(requestBody);
                             });
                         }
                     });
                 } else {
                     swal('Error', 'Input cannot be empty', 'error').then(() => {
                         // Reopen the create dialog if validation fails
-                        addNewTask(sendingData)
+                        addNewTask(requestBody)
                     });
                 }
             }
@@ -430,14 +454,14 @@ function updateTask(taskId) {
     $.ajax({
         async: true,
         type: 'GET',
-        url: `${apiUrl}Tasks/TaskId/${taskId}`,
+        url: `${apiUrl}/Tasks/TaskId/${taskId}`,
         dataType: 'json',
-        success: function (receivedData) {
-            //console.log(receivedData);
+        success: function (response) {
+            //console.log(response);
 
             // Load and set selected to option
-            loadListOption(receivedData.listId);
-            loadRepeatOption(receivedData.repeatId);
+            loadListOption(response.listId);
+            loadRepeatOption(response.repeatId);
 
             // Display update task dialog with delay
             setTimeout(function () {
@@ -448,11 +472,11 @@ function updateTask(taskId) {
                         attributes: {
                             innerHTML: `
                                 <div class="form__group field">
-                                    <input type="text" class="form__field" placeholder="Title" id="swal-input-title" value="${receivedData.title}" required>
+                                    <input type="text" class="form__field" placeholder="Title" id="swal-input-title" value="${response.title}" required>
                                     <label for="swal-input-title" class="form__label">Title</label>
                                 </div>
                                 <div class="form__group field">
-                                    <input type="text" class="form__field" placeholder="Note" id="swal-input-note" value="${receivedData.note}">
+                                    <input type="text" class="form__field" placeholder="Note" id="swal-input-note" value="${response.note}">
                                     <label for="swal-input-note" class="form__label">Note</label>
                                 </div>
                                 <div style="display: flex; width: 95%">
@@ -464,15 +488,15 @@ function updateTask(taskId) {
                                     </div>
                                     <div class="form__group field">
                                         <select class="form__field" id="swal-input-priority">
-                                            <option value="Low" ${receivedData.priority === 'Low' ? 'selected' : ''}>Low</option>
-                                            <option value="Medium" ${receivedData.priority === 'Medium' ? 'selected' : ''}>Medium</option>
-                                            <option value="High" ${receivedData.priority === 'High' ? 'selected' : ''}>High</option>
+                                            <option value="Low" ${response.priority === 'Low' ? 'selected' : ''}>Low</option>
+                                            <option value="Medium" ${response.priority === 'Medium' ? 'selected' : ''}>Medium</option>
+                                            <option value="High" ${response.priority === 'High' ? 'selected' : ''}>High</option>
                                         </select>
                                         <label for="swal-input-priority" class="form__label">Priority</label>
                                     </div>          
                                 </div>
                                 <div class="form__group field">
-                                    <input type="datetime-local" class="form__field" placeholder="Due Date" id="swal-input-due-date" value="${receivedData.dueDate}" required>
+                                    <input type="datetime-local" class="form__field" placeholder="Due Date" id="swal-input-due-date" value="${response.dueDate}" required>
                                     <label for="swal-input-due-date" class="form__label">Due Date</label>
                                 </div>
                                 <div class="form__group field">
@@ -498,37 +522,32 @@ function updateTask(taskId) {
                         const priority = document.getElementById('swal-input-priority').value;
                         const dueDateString = document.getElementById('swal-input-due-date').value;
                         const repeat = document.getElementById('swal-input-repeat').value;
-
-                        // Set status ('Pending', 'In Progress', 'Completed') base on due date
-                        let dueDate = new Date(dueDateString);
-                        let currentDateTime = new Date();
-                        let status = dueDate < currentDateTime ? 'Pending' : 'In Progress';
-
+                        
                         // Validate input
-                        if (title && list && priority && dueDate && repeat) {
+                        if (title && list && priority && dueDateString && repeat) {
                             // Set input value into sending data
-                            let sendingData = {
+                            let requestBody = {
                                 listId: list,
                                 title: title,
                                 note: note,
                                 dueDate: dueDateString,
                                 repeatId: repeat,
                                 priority: priority,
-                                status: status,
+                                status: getStatus(dueDateString),
                             };
 
                             // Call API to update task
                             $.ajax({
                                 async: true,
                                 type: 'PUT',
-                                url: `${apiUrl}Tasks/${receivedData.taskId}`,
+                                url: `${apiUrl}/Tasks/${response.taskId}`,
                                 contentType: 'application/json',
-                                data: JSON.stringify(sendingData),
-                                success: function (receivedData) {
-                                    //console.log(receivedData);
+                                data: JSON.stringify(requestBody),
+                                success: function (response) {
+                                    //console.log(response);
 
                                     // Reload tasks if response ok
-                                    displayTasksByTimeUnit('All tasks', 'all');
+                                    reloadTaskList();
                                     swal('Success', 'Update task successful', 'success');
                                 },
                                 error: function (xhr) {
@@ -564,41 +583,40 @@ function updateTaskDueDate(taskId) {
     $.ajax({
         async: true,
         type: 'GET',
-        url: `${apiUrl}Tasks/TaskId/${taskId}`,
+        url: `${apiUrl}/Tasks/TaskId/${taskId}`,
         dataType: 'json',
-        success: function (receivedData) {
-            //console.log(receivedData);
+        success: function (response) {
+            //console.log(response);
 
             // Set variable
-            let taskId = receivedData.taskId;
+            let taskId = response.taskId;
             let currentDate = new Date();
 
             // Set new due date base on repeat type
-            let dueDate = new Date(receivedData.dueDate);
-            let newDueDate = new Date(receivedData.dueDate);
-            // Set it to GMT+7
-            newDueDate.setHours(currentDateTime.getHours() + 7);
+            let dueDate = new Date(response.dueDate);
+            let newDueDate = new Date(response.dueDate);
+            newDueDate.setHours(currentDate.getHours() + 7); // Set it to GMT+7
 
             // Call API to set new due date
             $.ajax({
                 async: true,
                 type: 'GET',
-                url: `${apiUrl}Repeats/${receivedData.repeatId}`,
+                url: `${apiUrl}/Repeats/${response.repeatId}`,
                 contentType: 'application/json',
-                success: function (receivedData) {
-                    //console.log(receivedData);
+                success: function (response) {
+                    //console.log(response);
 
                     // Update due date to the next closest future occurrence base on repeat time unit
                     do {
-                        switch (receivedData.unit) {
+                        switch (response.unit) {
                             case 'Day':
-                                newDueDate.setDate(newDueDate.getDate() + receivedData.duration);
+                                newDueDate.setDate(newDueDate.getDate() + response.duration);
                                 break;
                             case 'Month':
-                                newDueDate.setMonth(newDueDate.getMonth() + receivedData.duration);
+                                newDueDate.setMonth(newDueDate.getMonth() + response.duration);
                                 break;
                             case 'Year':
-                                newDueDate.setFullYear(newDueDate.getFullYear() + receivedData.duration);
+                                newDueDate.setFullYear(newDueDate.getFullYear() + response.duration);
                                 break;
                         }
                     } while (newDueDate <= currentDate)
@@ -607,40 +625,40 @@ function updateTaskDueDate(taskId) {
                     $.ajax({
                         async: true,
                         type: 'PUT',
-                        url: `${apiUrl}Tasks/DueDate/${taskId}?newDueDate=${newDueDate.toISOString().slice(0, 16)}`,
+                        url: `${apiUrl}/Tasks/DueDate/${taskId}?newDueDate=${newDueDate.toISOString().slice(0, 16)}`,
                         contentType: 'application/json',
-                        success: function (receivedData) {
-                            //console.log(receivedData);
+                        success: function (response) {
+                            //console.log(response);
 
                             if (preferences.checkTime === 0 && dueDate.getDate() === currentDate.getDate()) {
                                 // Call API to update check time
                                 $.ajax({
                                     async: true,
                                     type: 'PUT',
-                                    url: `${apiUrl}Users/CheckTime/${preferences.userId}`,
+                                    url: `${apiUrl}/Users/CheckTime/${preferences.userId}`,
                                     contentType: 'application/json',
-                                    success: function (receivedData) {
-                                        //console.log(receivedData);
-                                        
+                                    success: function (response) {
+                                        //console.log(response);
+
                                         preferences.checkTime = 1;
 
                                         // Call API to update streak
                                         $.ajax({
                                             async: true,
                                             type: 'PUT',
-                                            url: `${apiUrl}Users/UpdateStreak/${preferences.userId}`,
+                                            url: `${apiUrl}/Users/UpdateStreak/${preferences.userId}`,
                                             contentType: 'application/json',
-                                            success: function (receivedData) {
-                                                //console.log(receivedData);
+                                            success: function (response) {
+                                                //console.log(response);
 
                                                 // Set data to local storage and display them
-                                                setUserPreferences(receivedData.userId, receivedData.username, receivedData.email, receivedData.checkTime, receivedData.streak);
+                                                setUserPreferences(response.userId, response.username, response.email, response.checkTime, response.streak);
                                                 displayProfileData();
 
-                                                animationIncreaseStreak()
+                                                animationUpdateStreak()
 
                                                 // Reload tasks if response ok
-                                                displayTasksByTimeUnit('All tasks', 'all');
+                                                reloadTaskList();
                                                 swal('Success', `Update streak - ${preferences.checkTime}`, 'success');
                                             },
                                             error: function (xhr) {
@@ -658,7 +676,7 @@ function updateTaskDueDate(taskId) {
                                 });
                             } else {
                                 // Reload tasks if response ok
-                                displayTasksByTimeUnit('All tasks', 'all');
+                                reloadTaskList();
                                 swal('Success', `Not update streak - ${preferences.checkTime}`, 'success');
                             }
                         },
@@ -705,13 +723,13 @@ function deleteTask(taskId) {
             $.ajax({
                 async: true,
                 type: 'DELETE',
-                url: `${apiUrl}Tasks/${taskId}`,
+                url: `${apiUrl}/Tasks/${taskId}`,
                 contentType: 'application/json',
-                success: function (receivedData) {
-                    //console.log(receivedData);
+                success: function (response) {
+                    //console.log(response);
 
                     // Reload tasks if response ok
-                    displayTasksByTimeUnit('All tasks', 'all');
+                    reloadTaskList();
                     swal('Success', 'Delete list successfully.', 'success');
                 },
                 error: function (xhr) {

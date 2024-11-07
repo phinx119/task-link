@@ -21,19 +21,14 @@ function displayTaskList() {
     let taskListsHtml = '';
 
     // Call api to get task by user id
-    $.ajax({
-        async: true,
-        type: 'GET',
-        url: `${apiUrl}TaskLists/${preferences.userId}`,
-        dataType: 'json',
-        success: function (receivedData) {
-            //console.log(receivedData);
+    $.getJSON(`${apiUrl}/TaskLists/${preferences.userId}`, function (response) {
+        //console.log(response);
 
-            if (receivedData == null || receivedData.length === 0) {
-                swal('Info', 'No task list found', 'info');
-            } else {
-                $.each(receivedData, function (index, taskList) {
-                    taskListsHtml += `                
+        if (response == null || response.length === 0) {
+            swal('Info', 'No task list found', 'info');
+        } else {
+            $.each(response, function (index, taskList) {
+                taskListsHtml += `                
                         <li>
                             <a href="#" onclick="displayTasksByTaskList(${taskList.listId}, '${taskList.listName}')">
                                 <i class="bx bx-task"></i>
@@ -47,18 +42,12 @@ function displayTaskList() {
                             </div> 
                         </li>
                     `;
-                });
-            }
-
-            // Set html
-            $('#list-by-name').html(taskListsHtml);
-        },
-        error: function (xhr) {
-            //console.error(xhr.responseText);
-
-            swal('Error', `${xhr.responseText}`, 'error');
+            });
         }
-    });
+
+        // Set html
+        $('#list-by-name').html(taskListsHtml);
+    }).fail(handleAjaxError);
 }
 
 // Create new list -----------------------------------------------------------------------------------------------------
@@ -69,62 +58,67 @@ function displayTaskList() {
 // ██       ██████  ███████    ██
 
 function addNewTaskList() {
-    // Display create new task list dialog
-    swal({
-        title: 'Create new task list',
-        content: {
-            element: 'div',
-            attributes: {
-                innerHTML: `
+    // Show the create list dialog
+    const showCreateListDialog = (errorMessage = '') => {
+        swal({
+            title: 'Create new task list',
+            content: {
+                element: 'div',
+                attributes: {
+                    innerHTML: `
                     <div class="form__group field">
                         <input type="text" class="form__field" placeholder="List Name" id="swal-input-list-name" required>
                         <label for="swal-input-list-name" class="form__label">List Name</label>
                     </div>
+                    ${errorMessage ? `<br><p class="error-message">${errorMessage}</p>` : ''}
                 `,
+                },
             },
-        },
-        buttons: {
-            cancel: 'Cancel',
-            confirm: 'Save',
-        },
-        closeOnClickOutside: false,
-    }).then((result) => {
-        if (result && result.dismiss !== 'cancel') {
-            // Get input value
-            const listName = document.getElementById('swal-input-list-name').value;
-
-            // Validate input
-            if (listName && listName !== '') {
-                // Call API to create new task list
-                $.ajax({
-                    async: true,
-                    type: 'POST',
-                    url: `${apiUrl}TaskLists/${preferences.userId}?listName=${listName}`,
-                    contentType: 'application/json',
-                    success: function (receivedData) {
-                        //console.log(receivedData);
-
-                        // Reload task list if response ok
-                        displayTaskList();
-                        swal('Success', 'Create new list successfully.', 'success');
-                    },
-                    error: function (xhr) {
-                        //console.error(xhr.responseText);
-
-                        swal('Error', `${xhr.responseText}`, 'error').then(() => {
-                            // Reopen the create dialog if response error
-                            addNewTaskList();
-                        });
-                    }
-                });
-            } else {
-                swal('Error', 'List name cannot be empty', 'error').then(() => {
-                    // Reopen the create dialog if validation fails
-                    addNewTaskList();
-                });
+            buttons: {
+                cancel: 'Cancel',
+                confirm: 'Save',
+            },
+            closeOnClickOutside: false,
+        }).then((result) => {
+            if (result && result.dismiss !== 'cancel') {
+                attemptCreateList();
             }
+        });
+    };
+
+    // Attempt to create list with the entered credentials
+    const attemptCreateList = () => {
+        // Get input value
+        const listName = document.getElementById('swal-input-list-name').value;
+        
+        // Reopen the create list dialog if validation fails
+        if (!listName && listName === '') {
+            showCreateListDialog('List name cannot be empty');
+            return;
         }
-    });
+
+        // Call API to create new task list
+        $.ajax({
+            async: true,
+            type: 'POST',
+            url: `${apiUrl}/TaskLists/${preferences.userId}?listName=${listName}`,
+            contentType: 'application/json',
+            success: function (response) {
+                //console.log(response);
+
+                // Reload task list if response ok
+                displayTaskList();
+                swal('Success', 'Create new list successfully.', 'success');
+            },
+            error: function (xhr) {
+                //console.error(xhr.responseText);
+                showCreateListDialog(xhr.responseText || 'Create new task list failed. Please try again.');
+            }
+        });
+    }
+
+    // Show the initial create list dialog
+    showCreateListDialog();
 }
 
 // Update list name ----------------------------------------------------------------------------------------------------
@@ -165,10 +159,10 @@ function updateTaskList(listId, listName) {
                 $.ajax({
                     async: true,
                     type: 'PUT',
-                    url: `${apiUrl}TaskLists/${preferences.userId}/${listId}?listName=${listName}`,
+                    url: `${apiUrl}/TaskLists/${preferences.userId}/${listId}?listName=${listName}`,
                     contentType: 'application/json',
-                    success: function (receivedData) {
-                        //console.log(receivedData);
+                    success: function (response) {
+                        //console.log(response);
 
                         // Reload task list if response ok
                         displayTaskList();
@@ -214,10 +208,10 @@ function deleteTaskList(listId) {
             $.ajax({
                 async: true,
                 type: 'DELETE',
-                url: `${apiUrl}TaskLists/${preferences.userId}/${listId}`,
+                url: `${apiUrl}/TaskLists/${preferences.userId}/${listId}`,
                 contentType: 'application/json',
-                success: function (receivedData) {
-                    //console.log(receivedData);
+                success: function (response) {
+                    //console.log(response);
 
                     // Reload task list if response ok
                     displayTaskList();

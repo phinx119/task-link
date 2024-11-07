@@ -1,25 +1,18 @@
 // Manage user ---------------------------------------------------------------------------------------------------------
 function manageUser() {
-    $.ajax({
-        url: `${apiUrl}Users/${preferences.userId}`,
-        type: 'GET',
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json',
-        success: function (result) {
-            //console.log(result);
+    // Call API to get user by id
+    $.getJSON(`${apiUrl}/Users/${preferences.userId}`, function (response) {
+        //console.log(response);
 
-            // Set data to local storage and display them
-            setUserPreferences(result.userId, result.username, result.email, result.checkTime, result.streak);
-            displayProfileData();
-        },
-        error: function (xhr) {
-            //console.error(xhr.responseText);
-
-            swal('Error', `${xhr.responseText}`, 'error').then(() => {
-                // Reopen the login dialog if validation fails
-                login();
-            });
-        }
+        // Set data to local storage and display them
+        setUserPreferences(response.userId, response.username, response.email, response.checkTime, response.streak);
+        displayProfileData();
+    }).fail(function (xhr) {
+        //console.error(xhr.responseText);
+        swal('Error', `${xhr.responseText}`, 'error').then(() => {
+            // Reopen the login dialog if validation fails
+            login();
+        });
     });
 
     // Initial call
@@ -28,6 +21,8 @@ function manageUser() {
     // Call the function to display profile data
     displayProfileData();
 }
+
+let preferences = getUserPreferences();
 
 // Get user preferences from local storage
 function getUserPreferences() {
@@ -89,7 +84,7 @@ function displayStreak(streak) {
     });
 }
 
-function animationIncreaseStreak() {
+function animationUpdateStreak() {
     $('.bxs-hot').addClass('bx-tada');
     setTimeout(function () {
         $('.bxs-hot').removeClass('bx-tada');
@@ -107,25 +102,18 @@ function resetStreak() {
     $.ajax({
         async: true,
         type: 'PUT',
-        url: `${apiUrl}Users/ResetStreak/${preferences.userId}`,
+        url: `${apiUrl}/Users/ResetStreak/${preferences.userId}`,
         contentType: 'application/json',
-        success: function (receivedData) {
-            console.log(receivedData);
+        success: function (response) {
+            //console.log(response);
 
             // Set data to local storage and display them
-            setUserPreferences(receivedData.userId, receivedData.username, receivedData.email, receivedData.checkTime, receivedData.streak);
+            setUserPreferences(response.userId, response.username, response.email, response.checkTime, response.streak);
             displayProfileData();
         },
-        error: function (xhr) {
-            //console.error(xhr.responseText);
-
-            swal('Error', `${xhr.responseText}`, 'error');
-        }
+        error: handleAjaxError
     });
 }
-
-// Check if user preferences are already set
-let preferences = getUserPreferences();
 
 // Calculate time until midnight
 function scheduleResetCheckTimeAtMidnight() {
@@ -149,73 +137,78 @@ function scheduleResetCheckTimeAtMidnight() {
 // ███████  ██████   ██████  ██ ██   ████ 
 
 function login() {
-    // Display login dialog
-    swal({
-        title: 'Login',
-        content: {
-            element: 'div',
-            attributes: {
-                innerHTML: `
-                    <div class="form__group field">
-                        <input type="text" class="form__field" placeholder="Username" id="swal-input-username" required>
-                        <label for="swal-input-username" class="form__label">Username</label>
-                    </div>
-                    <div class="form__group field">
-                        <input type="password" class="form__field" placeholder="Password" id="swal-input-password" required>
-                        <label for="swal-input-password" class="form__label">Password</label>
-                    </div>
-                    <br>
-                    <b id="btn-register">Register</b>
-                `,
+    // Show the login dialog
+    const showLoginDialog = (errorMessage = '') => {
+        swal({
+            title: 'Login',
+            content: {
+                element: 'div',
+                attributes: {
+                    innerHTML: `
+                        <div class="form__group field">
+                            <input type="text" class="form__field" placeholder="Username" id="swal-input-username" required>
+                            <label for="swal-input-username" class="form__label">Username</label>
+                        </div>
+                        <div class="form__group field">
+                            <input type="password" class="form__field" placeholder="Password" id="swal-input-password" required>
+                            <label for="swal-input-password" class="form__label">Password</label>
+                        </div>
+                        ${errorMessage ? `<br><p class="error-message">${errorMessage}</p>` : ''}
+                        <br>                        
+                        <b id="btn-register">Register</b>
+                    `,
+                },
             },
-        },
-        buttons: {
-            cancel: 'Cancel',
-            confirm: 'Save',
-        },
-        closeOnClickOutside: false,
-    }).then((result) => {
-        if (result && result.dismiss !== 'cancel') {
-            // Get input value
-            const username = document.getElementById('swal-input-username').value;
-            const password = document.getElementById('swal-input-password').value;
-
-            // Validate input
-            if (username && password) {
-                // Call API to login
-                $.ajax({
-                    url: `${apiUrl}Users/Login?username=${username}&password=${password}`,
-                    type: 'GET',
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json',
-                    success: function (result) {
-                        //console.log(result);
-
-                        // Set data to local storage and display them
-                        setUserPreferences(result.userId, result.username, result.email, result.checkTime, result.streak);
-                        displayProfileData();
-
-                        swal('Success', 'Login successful', 'success').then(() => {
-                            window.location.reload();
-                        });
-                    },
-                    error: function (xhr) {
-                        //console.error(xhr.responseText);
-
-                        swal('Error', `${xhr.responseText}`, 'error').then(() => {
-                            // Reopen the login dialog if validation fails
-                            login();
-                        });
-                    }
-                });
-            } else {
-                swal('Error', 'Username and Password cannot be empty', 'error').then(() => {
-                    // Reopen the login dialog if validation fails
-                    login();
-                });
+            buttons: {
+                cancel: 'Cancel',
+                confirm: 'Login',
+            },
+            closeOnClickOutside: false,
+        }).then((result) => {
+            if (result && result.dismiss !== 'cancel') {
+                attemptLogin();
             }
+        });
+    };
+
+    // Attempt login with the entered credentials
+    const attemptLogin = () => {
+        // Get input value
+        const username = document.getElementById('swal-input-username').value;
+        const password = document.getElementById('swal-input-password').value;
+
+        // Reopen the login if validation fails
+        if (!username || !password) {
+            showLoginDialog('Username and Password cannot be empty');
+            return;
         }
-    });
+
+        // Call API to log in with username and password
+        $.ajax({
+            url: `${apiUrl}/Users/Login?username=${username}&password=${password}`,
+            type: 'GET',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (response) {
+                //console.log(response);         
+
+                // Set data to local storage and display them
+                setUserPreferences(response.userId, response.username, response.email, response.checkTime, response.streak);
+                displayProfileData();
+
+                swal('Success', 'Login successful', 'success').then(() => {
+                    window.location.reload();
+                });
+            },
+            error: function (xhr) {
+                //console.error(xhr.responseText);                
+                showLoginDialog(xhr.responseText || 'Login failed. Please try again.');
+            }
+        });
+    };
+
+    // Show the initial login dialog
+    showLoginDialog();
 }
 
 // Logout --------------------------------------------------------------------------------------------------------------

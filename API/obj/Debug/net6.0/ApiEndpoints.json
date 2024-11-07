@@ -268,6 +268,22 @@
   },
   {
     "ContainingType": "API.Controllers.UsersController",
+    "Method": "GetListByUserId",
+    "RelativePath": "api/Users/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.UsersController",
     "Method": "UpdateCheckTime",
     "RelativePath": "api/Users/CheckTime/{userId}",
     "HttpMethod": "PUT",
