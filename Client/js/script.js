@@ -6,16 +6,17 @@ $(document).ready(function () {
     } else {
         login();
     }
-    
+
     function manageSystem() {
-        manageUser();
-        manageTaskList();
-        manageTask();
-    }    
-    
-    $(this).on('click', function () {
-        console.log(new Date());
-    });
+        getTaskListList();
+        getRepeatList();
+
+        setTimeout(function () {
+            manageUser();
+            manageTaskList();
+            manageTask();
+        }, 100);
+    }
 });
 
 // Error handling
@@ -28,9 +29,9 @@ function handleAjaxError(xhr) {
 function showDivisionsWithDelay() {
     const delay = 100;
 
-    $('.card').each(function(index) {
+    $('.card').each(function (index) {
         const card = $(this);
-        setTimeout(function() {
+        setTimeout(function () {
             card.css('opacity', 0.7);
         }, (index + 1) * delay);
     });

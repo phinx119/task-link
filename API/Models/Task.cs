@@ -16,6 +16,8 @@ namespace API.Models
         public DateTime? UpdatedAt { get; set; }
 
         [JsonIgnore]
-        public virtual TaskList List { get; set; } = null!;
+        public virtual TaskList? List { get; set; } = null!;
+        [JsonIgnore]
+        public virtual Repeat Repeat { get; set; } = null!;
     }
 }

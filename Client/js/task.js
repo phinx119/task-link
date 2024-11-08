@@ -1,7 +1,7 @@
 // Manage task ---------------------------------------------------------------------------------------------------------
 function manageTask() {
     // Display task
-    displayTasksByTimeUnit('Today', 'day');
+    displayTasksByTimeUnit('All tasks', 'all');
 
     // Handle search task by title
     $('#search').on('keypress', function (e) {
@@ -27,6 +27,46 @@ function manageTask() {
     });
 }
 
+let taskLists = {};
+
+function getTaskListList() {
+    // Call API to get user by id
+    $.getJSON(`${apiUrl}/TaskLists/${preferences.userId}`, function (response) {
+        //console.log(response);
+
+        taskLists = {};
+        $.each(response, function (index, taskList) {
+            taskLists[taskList.listId] = taskList.listName;
+        });        
+    }).fail(function (xhr) {
+        //console.error(xhr.responseText);
+        swal('Error', `${xhr.responseText}`, 'error').then(() => {
+            // Reopen the login dialog if validation fails
+            getTaskListList()
+        });
+    });
+}
+
+let repeats = {};
+
+function getRepeatList() {
+    // Call API to get user by id
+    $.getJSON(`${apiUrl}/Repeats`, function (response) {
+        //console.log(response);
+
+        repeats = {};
+        $.each(response, function (index, repeat) {
+            repeats[repeat.repeatId] = repeat.repeatName;
+        });
+    }).fail(function (xhr) {
+        //console.error(xhr.responseText);
+        swal('Error', `${xhr.responseText}`, 'error').then(() => {
+            // Reopen the login dialog if validation fails
+            getRepeatList();
+        });
+    });
+}
+
 // Display task ------------------------------------------------------------------------------------------------------
 //  ██████  ███████ ████████
 // ██       ██         ██
@@ -39,14 +79,14 @@ function isToday(dateString) {
     const today = new Date();
     const date = new Date(dateString);
     return date.toDateString() === today.toDateString();
-};
+}
 
 // Check if a date is today
 function isTooLate(dateString) {
     const today = new Date();
     const date = new Date(dateString);
     return date < today;
-};
+}
 
 function formatDate(date) {
     const options = {
@@ -59,6 +99,12 @@ function formatDate(date) {
     const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 
     return `${formattedDate} - ${formattedTime}`;
+}
+
+function displayPriority(priority) {
+    if (priority === 'Low') return '!';
+    if (priority === 'Medium') return '!!';
+    if (priority === 'High') return '!!!';
 }
 
 // Display tasks and set data into task card
@@ -76,14 +122,14 @@ function displayTasks(html, response) {
                 resetStreak();
                 animationUpdateStreak()
             }
-
+            
             html += `                
                 <div class="card align">
                     <input type="checkbox" name="task" onclick="updateTaskDueDate(${task.taskId})">
                     <div>
-                        <span>${task.title}</span>
+                        <span><span class="priority">${displayPriority(task.priority)}</span> ${task.title}</span>
                         <p id="taskDate" class="date ${isToday(task.dueDate) ? 'today' : ''} ${isTooLate(task.dueDate) ? 'too-late' : ''}">                        
-                            <i class="bx bx-calendar-alt"></i> ${formatDate(dueDate)}
+                            <i class="bx bx-calendar-alt"></i> ${taskLists[task.listId]} - ${formatDate(dueDate)}, ${repeats[task.repeatId]}
                         </p>
                     </div>
                     <i class="bx bx-info-circle" onclick="updateTask(${task.taskId})"></i>
@@ -105,7 +151,7 @@ function displayTasksByTimeUnit(timeUnit, timeUnitUrl) {
     // Set header title
     $('#header_title').html(timeUnit);
     $('#additional-info').html(timeUnitUrl);
-    
+
     // Clear search bar
     $('#search').val('');
 
@@ -137,7 +183,7 @@ function displayTasksByTaskList(listId, listName) {
     // Set header title
     $('#header_title').html(listName);
     $('#additional-info').html(listId);
-    
+
     // Clear search bar
     $('#search').val('');
 
@@ -168,7 +214,7 @@ function displayTasksByTaskList(listId, listName) {
 function reloadTaskList() {
     const listName = $('#header_title').html();
     const additionalInfo = $('#additional-info').html();
-    
+
     if (listName === 'Result') {
         const searchInput = $('#search').val().trim().toLowerCase();
         searchTask(searchInput);
@@ -317,7 +363,7 @@ function getStatus(dueDateString) {
     // Set status ('Pending', 'In Progress', 'Completed') base on due date
     const currentDateTime = new Date();
     let dueDate = new Date(dueDateString);
-    return  dueDate < currentDateTime ? 'Pending' : 'In Progress';
+    return dueDate < currentDateTime ? 'Pending' : 'In Progress';
 }
 
 // Create new task -----------------------------------------------------------------------------------------------------
@@ -332,9 +378,15 @@ function addNewTask(requestBody) {
     const currentDateTime = new Date();
     currentDateTime.setHours(currentDateTime.getHours() + 7);
     let formattedCurrentDateTime = currentDateTime.toISOString().slice(0, 16);
-    
+
+    let listId = 1;
+    let additionalInfo = $('#additional-info').html();
+    if (!isNaN(additionalInfo)) {
+        listId = parseInt(additionalInfo, 10);
+    }
+
     // Load and set selected to option
-    loadListOption(requestBody.listId == null ? 1 : requestBody.listId);
+    loadListOption(requestBody.listId == null ? listId : requestBody.listId);
     loadRepeatOption(requestBody.repeatId == null ? 1 : requestBody.repeatId);
 
     // Display create new task dialog with delay
@@ -396,7 +448,7 @@ function addNewTask(requestBody) {
                 const priority = document.getElementById('swal-input-priority').value;
                 const dueDateString = document.getElementById('swal-input-due-date').value;
                 const repeat = document.getElementById('swal-input-repeat').value;
-                
+
                 // Validate input
                 if (title && list && priority && dueDateString && repeat) {
                     // Call API to create new task
@@ -522,7 +574,7 @@ function updateTask(taskId) {
                         const priority = document.getElementById('swal-input-priority').value;
                         const dueDateString = document.getElementById('swal-input-due-date').value;
                         const repeat = document.getElementById('swal-input-repeat').value;
-                        
+
                         // Validate input
                         if (title && list && priority && dueDateString && repeat) {
                             // Set input value into sending data

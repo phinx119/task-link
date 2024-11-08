@@ -25,6 +25,16 @@ namespace API.Controllers
             return Ok(taskLists);
         }
 
+        // GET: get list by id
+        [HttpGet("ListId/{listId}")]
+        public async Task<IActionResult> GetById(int listId)
+        {
+            // get list by id
+            var list = await context.TaskLists.FindAsync(listId);
+
+            return Ok(list);
+        }
+
         // GET: get list by user id
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetListByUserId(int userId)

@@ -25,11 +25,11 @@ namespace API.Controllers
             return Ok(repeats);
         }
 
-        // GET: get repeat by name
+        // GET: get repeat by id
         [HttpGet("{repeatId}")]
         public async Task<IActionResult> GetById(int repeatId)
         {
-            // get repeat by name
+            // get repeat by id
             var repeat = await context.Repeats.FindAsync(repeatId);
 
             return Ok(repeat);

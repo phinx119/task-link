@@ -137,6 +137,12 @@ function scheduleResetCheckTimeAtMidnight() {
 // ███████  ██████   ██████  ██ ██   ████ 
 
 function login() {
+    // set btn login
+    $('#btn-login-logout-container').html(`
+                <hr>
+                <a href="#" onclick="login()"><i class="bx bx-log-in"></i><span>Login</span></a>
+        `)
+    
     // Show the login dialog
     const showLoginDialog = (errorMessage = '') => {
         swal({

@@ -59,7 +59,7 @@
     margin: 0 5px;
 }
 
-.too-late, .error-message {
+.too-late, .error-message, .priority {
     color: #ff4646;
 }
 
